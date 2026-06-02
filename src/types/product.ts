@@ -1,20 +1,32 @@
-export type ProductCategory =
-  | "Procesor"
-  | "Placă video"
-  | "Placă de bază"
-  | "Memorie RAM"
-  | "Stocare"
-  | "Sursă"
-  | "Carcasă"
-  | "Periferic";
+import type { ProductCategory } from "@prisma/client";
 
-export type Product = {
+// Forma de date de care are nevoie interfața pentru a afișa un produs.
+// Decuplează componentele UI de modelul Prisma: datele din baza de date
+// (Decimal pentru preț, enum categoryType, stock numeric) sunt mapate la
+// acest view-model înainte de randare.
+export type ProductCardData = {
   id: string;
   name: string;
   brand: string;
-  category: ProductCategory;
+  categoryLabel: string;
   price: number;
   shortDescription: string;
-  score: number;
   inStock: boolean;
+  score?: number;
+};
+
+// Etichete în română pentru valorile enum-ului ProductCategory.
+// Tipul Record garantează că orice categorie nouă adăugată în enum
+// trebuie să primească o etichetă, altfel TypeScript semnalează eroare.
+export const categoryLabels: Record<ProductCategory, string> = {
+  CPU: "Procesor",
+  GPU: "Placă video",
+  MOTHERBOARD: "Placă de bază",
+  RAM: "Memorie RAM",
+  STORAGE: "Stocare",
+  PSU: "Sursă",
+  CASE: "Carcasă",
+  COOLER: "Răcire",
+  PERIPHERAL: "Periferic",
+  ACCESSORY: "Accesoriu",
 };

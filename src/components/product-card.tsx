@@ -1,7 +1,7 @@
-import type { Product } from "@/types/product";
+import type { ProductCardData } from "@/types/product";
 
 type ProductCardProps = {
-  product: Product;
+  product: ProductCardData;
 };
 
 function formatPrice(price: number): string {
@@ -17,7 +17,7 @@ export function ProductCard({ product }: ProductCardProps) {
     <article className="flex h-full flex-col rounded-lg border border-zinc-800 bg-zinc-900 p-5 transition-colors hover:border-zinc-700">
       <div className="mb-3 flex items-start justify-between gap-3">
         <span className="rounded-md bg-zinc-950 px-2 py-1 text-xs font-medium text-red-500">
-          {product.category}
+          {product.categoryLabel}
         </span>
         <span
           className={`text-xs font-medium ${
@@ -45,13 +45,15 @@ export function ProductCard({ product }: ProductCardProps) {
             {formatPrice(product.price)}
           </p>
         </div>
-        <div className="text-right">
-          <p className="text-xs text-zinc-500">Scor</p>
-          <p className="text-lg font-semibold text-zinc-100">
-            {product.score.toFixed(1)}
-            <span className="text-sm font-normal text-zinc-500"> / 10</span>
-          </p>
-        </div>
+        {product.score !== undefined && (
+          <div className="text-right">
+            <p className="text-xs text-zinc-500">Scor</p>
+            <p className="text-lg font-semibold text-zinc-100">
+              {product.score.toFixed(1)}
+              <span className="text-sm font-normal text-zinc-500"> / 10</span>
+            </p>
+          </div>
+        )}
       </div>
     </article>
   );

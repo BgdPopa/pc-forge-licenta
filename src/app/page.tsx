@@ -1,48 +1,9 @@
+import Link from "next/link";
 import { ProductCard } from "@/components/product-card";
-import { featuredProducts } from "@/data/products";
-import type { ProductCategory } from "@/types/product";
-
-const navLinks = [
-  { label: "Catalog", href: "#" },
-  { label: "Configurator", href: "#" },
-  { label: "Scoring", href: "#" },
-  { label: "Agent AI", href: "#" },
-];
-
-const categories: { name: ProductCategory; description: string }[] = [
-  {
-    name: "Procesor",
-    description: "CPU-uri pentru gaming, productivitate și utilizare generală.",
-  },
-  {
-    name: "Placă video",
-    description: "GPU-uri pentru randare, gaming și accelerare hardware.",
-  },
-  {
-    name: "Placă de bază",
-    description: "Platforme compatibile cu socket-ul și memoria alese.",
-  },
-  {
-    name: "Memorie RAM",
-    description: "Module DDR4 și DDR5 pentru configurații moderne.",
-  },
-  {
-    name: "Stocare",
-    description: "SSD-uri și HDD-uri pentru sistem și date.",
-  },
-  {
-    name: "Sursă",
-    description: "Surse de alimentare dimensionate după consumul total.",
-  },
-  {
-    name: "Carcasă",
-    description: "Carcase compatibile cu factorul de formă al plăcii de bază.",
-  },
-  {
-    name: "Periferic",
-    description: "Tastaturi, mouse-uri, monitoare și accesorii.",
-  },
-];
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { prisma } from "@/lib/prisma";
+import { categoryLabels, type ProductCardData } from "@/types/product";
 
 const technicalContributions = [
   {
@@ -62,27 +23,32 @@ const technicalContributions = [
   },
 ];
 
-export default function Home() {
+export default async function Home() {
+  // Citire server-side din PostgreSQL prin Prisma Client.
+  const [categories, dbProducts] = await Promise.all([
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    prisma.product.findMany({
+      where: { isActive: true },
+      orderBy: { price: "desc" },
+      take: 8,
+    }),
+  ]);
+
+  // Mapare model Prisma -> view-model UI (Decimal -> number, enum -> etichetă,
+  // stock numeric -> boolean).
+  const featuredProducts: ProductCardData[] = dbProducts.map((product) => ({
+    id: product.id,
+    name: product.name,
+    brand: product.brand,
+    categoryLabel: categoryLabels[product.categoryType],
+    price: Number(product.price),
+    shortDescription: product.shortDescription ?? product.description,
+    inStock: product.stock > 0,
+  }));
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
-      <header className="sticky top-0 z-10 border-b border-zinc-800 bg-zinc-950/95 backdrop-blur-sm">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
-          <a href="#" className="text-xl font-bold tracking-tight">
-            PC <span className="text-red-600">Forge</span>
-          </a>
-          <nav className="flex flex-wrap gap-1 sm:gap-2">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                className="rounded-md px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-red-500"
-              >
-                {link.label}
-              </a>
-            ))}
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main>
         <section className="border-b border-zinc-800 bg-zinc-900/40">
@@ -100,12 +66,12 @@ export default function Home() {
               contribuții tehnice integrate într-o singură platformă.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <a
-                href="#"
+              <Link
+                href="/catalog"
                 className="rounded-md bg-red-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-red-500"
               >
                 Explorează catalogul
-              </a>
+              </Link>
               <a
                 href="#contributii"
                 className="rounded-md border border-zinc-700 px-5 py-2.5 text-sm font-semibold text-zinc-200 transition-colors hover:border-red-600 hover:text-red-500"
@@ -151,18 +117,20 @@ export default function Home() {
             </p>
             <ul className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {categories.map((category) => (
-                <li key={category.name}>
-                  <a
-                    href="#"
+                <li key={category.id}>
+                  <Link
+                    href={`/catalog?category=${category.type}`}
                     className="block h-full rounded-lg border border-zinc-800 bg-zinc-900 p-4 transition-colors hover:border-red-600/50 hover:bg-zinc-900/80"
                   >
                     <h3 className="font-semibold text-zinc-100">
                       {category.name}
                     </h3>
-                    <p className="mt-2 text-sm text-zinc-500">
-                      {category.description}
-                    </p>
-                  </a>
+                    {category.description && (
+                      <p className="mt-2 text-sm text-zinc-500">
+                        {category.description}
+                      </p>
+                    )}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -175,8 +143,7 @@ export default function Home() {
               Produse recomandate
             </h2>
             <p className="mt-3 text-zinc-400">
-              Date temporare tipizate — vor fi înlocuite ulterior cu produse din
-              PostgreSQL.
+              Produse încărcate direct din baza de date PostgreSQL prin Prisma.
             </p>
             <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {featuredProducts.map((product) => (
@@ -189,11 +156,7 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="border-t border-zinc-800 bg-zinc-900">
-        <div className="mx-auto max-w-6xl px-4 py-8 text-center text-sm text-zinc-500 sm:px-6">
-          PC Forge — proiect de licență, Tehnici Web, FMI
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   );
 }
