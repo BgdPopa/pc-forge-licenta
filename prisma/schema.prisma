@@ -1,13 +1,254 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum ProductCategory {
+  CPU
+  GPU
+  MOTHERBOARD
+  RAM
+  STORAGE
+  PSU
+  CASE
+  COOLER
+  PERIPHERAL
+  ACCESSORY
+}
+
+enum CompatibilityRuleType {
+  CPU_SOCKET_MATCH
+  RAM_TYPE_MATCH
+  MOTHERBOARD_FORM_FACTOR_SUPPORTED
+  PSU_POWER_SUFFICIENT
+  COOLER_HEIGHT_SUPPORTED
+  GPU_LENGTH_SUPPORTED
+  STORAGE_INTERFACE_SUPPORTED
+  CUSTOM
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String?
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(USER)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  cart           Cart?
+  orders         Order[]
+  configurations Configuration[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String          @id @default(cuid())
+  name        String
+  slug        String          @unique
+  type        ProductCategory
+  description String?
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id               String          @id @default(cuid())
+  name             String
+  slug             String          @unique
+  brand            String
+  description      String
+  shortDescription String?
+  price            Decimal         @db.Decimal(10, 2)
+  stock            Int             @default(0)
+  imageUrl         String?
+  categoryId       String
+  categoryType     ProductCategory
+  specifications   Json?
+  isActive         Boolean         @default(true)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  category           Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  component          Component?
+  cartItems          CartItem[]
+  orderItems         OrderItem[]
+  configurationItems ConfigurationItem[]
+
+  @@index([categoryId])
+  @@index([categoryType])
+  @@index([brand])
+  @@map("products")
+}
+
+model Component {
+  id        String          @id @default(cuid())
+  productId String          @unique
+  type      ProductCategory
+
+  socket        String?
+  ramType       String?
+  formFactor    String?
+  interfaceType String?
+
+  tdpWatts   Int?
+  powerWatts Int?
+  lengthMm   Int?
+  heightMm   Int?
+  widthMm    Int?
+
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([type])
+  @@index([socket])
+  @@index([ramType])
+  @@index([formFactor])
+  @@map("components")
+}
+
+model CompatibilityRule {
+  id          String                @id @default(cuid())
+  name        String
+  description String?
+  ruleType    CompatibilityRuleType
+
+  sourceType ProductCategory
+  targetType ProductCategory
+
+  sourceField   String?
+  targetField   String?
+  operator      String?
+  expectedValue String?
+
+  metadata  Json?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([sourceType])
+  @@index([targetType])
+  @@index([ruleType])
+  @@map("compatibility_rules")
+}
+
+model Configuration {
+  id         String   @id @default(cuid())
+  userId     String?
+  name       String
+  totalPrice Decimal? @db.Decimal(10, 2)
+  totalPower Int?
+  isValid    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  user  User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  items ConfigurationItem[]
+
+  @@index([userId])
+  @@map("configurations")
+}
+
+model ConfigurationItem {
+  id              String          @id @default(cuid())
+  configurationId String
+  productId       String
+  categoryType    ProductCategory
+  createdAt       DateTime        @default(now())
+
+  configuration Configuration @relation(fields: [configurationId], references: [id], onDelete: Cascade)
+  product       Product       @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([configurationId, categoryType])
+  @@index([productId])
+  @@map("configuration_items")
+}
+
+model Cart {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@unique([cartId, productId])
+  @@index([productId])
+  @@map("cart_items")
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  userId      String
+  status      OrderStatus @default(PENDING)
+  totalAmount Decimal     @db.Decimal(10, 2)
+
+  customerName    String
+  customerEmail   String
+  shippingAddress String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("orders")
+}
+
+model OrderItem {
+  id          String  @id @default(cuid())
+  orderId     String
+  productId   String
+  productName String
+  quantity    Int
+  unitPrice   Decimal @db.Decimal(10, 2)
+  totalPrice  Decimal @db.Decimal(10, 2)
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
 }
