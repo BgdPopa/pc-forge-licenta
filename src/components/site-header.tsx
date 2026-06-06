@@ -6,6 +6,7 @@ const navLinks = [
   { label: "Configurator", href: "#" },
   { label: "Scoring", href: "#" },
   { label: "Agent AI", href: "#" },
+  { label: "Coș", href: "/cart" },
 ];
 
 export function SiteHeader() {

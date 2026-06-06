@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { AddToCartButton } from "@/components/add-to-cart-button";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { categoryLabels } from "@/types/product";
@@ -172,17 +173,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
               {inStock ? `În stoc (${product.stock} buc.)` : "Stoc epuizat"}
             </p>
 
-            <button
-              type="button"
-              disabled
-              aria-disabled="true"
-              className="mt-6 w-full cursor-not-allowed rounded-md bg-zinc-800 px-4 py-2.5 text-sm font-semibold text-zinc-500"
-            >
-              Adaugă în coș
-            </button>
-            <p className="mt-2 text-center text-xs text-zinc-600">
-              Coșul de cumpărături va fi disponibil într-o etapă viitoare.
-            </p>
+            <AddToCartButton productId={product.id} inStock={inStock} />
           </aside>
         </div>
 
