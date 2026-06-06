@@ -38,6 +38,7 @@ export default async function Home() {
   // stock numeric -> boolean).
   const featuredProducts: ProductCardData[] = dbProducts.map((product) => ({
     id: product.id,
+    slug: product.slug,
     name: product.name,
     brand: product.brand,
     categoryLabel: categoryLabels[product.categoryType],

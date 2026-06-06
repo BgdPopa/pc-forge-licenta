@@ -93,6 +93,7 @@ export default async function CatalogPage({
 
   const products: ProductCardData[] = dbProducts.map((product) => ({
     id: product.id,
+    slug: product.slug,
     name: product.name,
     brand: product.brand,
     categoryLabel: categoryLabels[product.categoryType],

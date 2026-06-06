@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AuthStatus } from "@/components/auth-status";
 
 const navLinks = [
   { label: "Catalog", href: "/catalog" },
@@ -14,17 +15,20 @@ export function SiteHeader() {
         <Link href="/" className="text-xl font-bold tracking-tight">
           PC <span className="text-red-600">Forge</span>
         </Link>
-        <nav className="flex flex-wrap gap-1 sm:gap-2">
-          {navLinks.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="rounded-md px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-red-500"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
+        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+          <nav className="flex flex-wrap gap-1 sm:gap-2">
+            {navLinks.map((link) => (
+              <Link
+                key={link.label}
+                href={link.href}
+                className="rounded-md px-3 py-2 text-sm text-zinc-300 transition-colors hover:bg-zinc-900 hover:text-red-500"
+              >
+                {link.label}
+              </Link>
+            ))}
+          </nav>
+          <AuthStatus />
+        </div>
       </div>
     </header>
   );

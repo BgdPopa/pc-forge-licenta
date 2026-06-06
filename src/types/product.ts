@@ -6,6 +6,7 @@ import type { ProductCategory } from "@prisma/client";
 // acest view-model înainte de randare.
 export type ProductCardData = {
   id: string;
+  slug: string;
   name: string;
   brand: string;
   categoryLabel: string;

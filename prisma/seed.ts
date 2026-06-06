@@ -3,7 +3,9 @@ import {
   Prisma,
   ProductCategory,
   CompatibilityRuleType,
+  Role,
 } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -464,6 +466,31 @@ const compatibilityRules: RuleSeed[] = [
   },
 ];
 
+type UserSeed = {
+  name: string;
+  email: string;
+  password: string;
+  role: Role;
+};
+
+// Utilizatori de development. Parolele sunt hash-uite cu bcrypt înainte de
+// stocare; în baza de date ajunge doar `passwordHash`, niciodată parola în clar.
+// Aceste credențiale sunt strict pentru testare locală și demonstrație.
+const users: UserSeed[] = [
+  {
+    name: "Administrator PC Forge",
+    email: "admin@pcforge.local",
+    password: "admin12345",
+    role: "ADMIN",
+  },
+  {
+    name: "Utilizator Demo",
+    email: "user@pcforge.local",
+    password: "user12345",
+    role: "USER",
+  },
+];
+
 async function main() {
   console.log("Seed pornit...");
 
@@ -590,6 +617,25 @@ async function main() {
   console.log(
     `Reguli de compatibilitate sincronizate: ${compatibilityRules.length}`,
   );
+
+  for (const user of users) {
+    const passwordHash = await bcrypt.hash(user.password, 12);
+    await prisma.user.upsert({
+      where: { email: user.email },
+      update: {
+        name: user.name,
+        role: user.role,
+        passwordHash,
+      },
+      create: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        passwordHash,
+      },
+    });
+  }
+  console.log(`Utilizatori sincronizați: ${users.length}`);
 
   console.log("Seed finalizat cu succes.");
 }
