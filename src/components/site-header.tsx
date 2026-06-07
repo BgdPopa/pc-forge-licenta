@@ -4,7 +4,7 @@ import { AuthStatus } from "@/components/auth-status";
 const navLinks = [
   { label: "Catalog", href: "/catalog" },
   { label: "Configurator", href: "/configurator" },
-  { label: "Scoring", href: "#" },
+  { label: "Scoring", href: "/scoring" },
   { label: "Agent AI", href: "#" },
   { label: "Coș", href: "/cart" },
 ];
