@@ -11,6 +11,33 @@ interface Message {
   content: string;
 }
 
+// Cuvinte ce nu aduc valoare în tsquery: termeni de categorie în română
+// (categoria e filtrată deja prin enum) și stopwords funcționale ≥3 litere.
+// Termenii tehnici (ssd, nvme, gpu, rtx, ddr5 etc.) sunt păstrați în mod intenționat.
+const SKIP_WORDS = new Set([
+  "procesor", "procesoare",
+  "placă", "placa", "placi",
+  "memorie", "memorii",
+  "stocare",
+  "sursă", "sursa",
+  "carcasă", "carcasa",
+  "răcire", "racire", "ventilator",
+  "periferic", "periferice",
+  "accesoriu", "accesorii",
+  // stopwords funcționale românești
+  "mai", "cel", "cea", "cei", "ale",
+  "bun", "buna", "bune", "buni", "bună",
+  "care", "pentru", "sau", "din", "una",
+  "vreau", "vrei", "vrea",
+  "cumpar", "cumpăr", "cumpara", "cumpără",
+  "recomanda", "recomandă", "recomandati", "recomandați",
+  "costa", "costă", "cat", "cât", "pret", "preț",
+  "poti", "poți", "spune",
+  "toate", "toti", "toți", "toata", "toată",
+  "este", "esti", "ești", "sunt", "avem", "aveti", "aveți",
+  "orice", "imi", "îmi",
+]);
+
 // Mapare termeni româno-englezi → valori enum ProductCategory
 const CATEGORY_MAP: Record<string, ProductCategory> = {
   procesor: ProductCategory.CPU,
@@ -55,6 +82,15 @@ function detectCategories(message: string): ProductCategory[] {
   return Array.from(found);
 }
 
+function buildTsquery(query: string): string {
+  return query
+    .toLowerCase()
+    .replace(/[^a-zăâîșțA-ZĂÂÎȘȚ0-9\s]/g, " ")
+    .split(/\s+/)
+    .filter((w) => w.length >= 3 && !SKIP_WORDS.has(w))
+    .join(" & ");
+}
+
 type ProductRaw = {
   id: string;
   name: string;
@@ -68,16 +104,10 @@ type ProductRaw = {
 
 async function searchProducts(query: string): Promise<ProductRaw[]> {
   const categories = detectCategories(query);
+  const tsquery = buildTsquery(query);
 
-  // Construiește un tsquery sigur din cuvintele din mesaj
-  const words = query
-    .toLowerCase()
-    .replace(/[^a-zăâîșțA-ZĂÂÎȘȚ0-9\s]/g, " ")
-    .split(/\s+/)
-    .filter((w) => w.length >= 3);
-
-  // Dacă nu există cuvinte utilizabile, fallback la categorii sau top produse
-  if (words.length === 0) {
+  // Fără tokeni FTS utilizabili → produse din categorii detectate sau top 10
+  if (!tsquery) {
     if (categories.length > 0) {
       return prisma.$queryRaw<ProductRaw[]>`
         SELECT id, name, brand, description, price::text as price,
@@ -99,36 +129,48 @@ async function searchProducts(query: string): Promise<ProductRaw[]> {
     `;
   }
 
-  const tsquery = words.join(" & ");
-
+  // tsvector include specifications::text pentru termeni tehnici (DDR5, NVMe, RTX, Ryzen etc.)
   if (categories.length > 0) {
-    return prisma.$queryRaw<ProductRaw[]>`
+    const results = await prisma.$queryRaw<ProductRaw[]>`
       SELECT id, name, brand, description, price::text as price,
              stock, "categoryType"::text, specifications,
              ts_rank(
-               to_tsvector('simple', name || ' ' || brand || ' ' || description),
+               to_tsvector('simple', name || ' ' || brand || ' ' || description || ' ' || COALESCE(specifications::text, '')),
                to_tsquery('simple', ${tsquery})
              ) AS rank
       FROM products
       WHERE "isActive" = true
         AND "categoryType" = ANY(${categories}::"ProductCategory"[])
-        AND to_tsvector('simple', name || ' ' || brand || ' ' || description)
+        AND to_tsvector('simple', name || ' ' || brand || ' ' || description || ' ' || COALESCE(specifications::text, ''))
             @@ to_tsquery('simple', ${tsquery})
       ORDER BY rank DESC
       LIMIT 10
     `;
+    // Fallback: categorie detectată dar FTS fără rezultate → produse din categorie
+    if (results.length === 0) {
+      return prisma.$queryRaw<ProductRaw[]>`
+        SELECT id, name, brand, description, price::text as price,
+               stock, "categoryType"::text, specifications
+        FROM products
+        WHERE "isActive" = true
+          AND "categoryType" = ANY(${categories}::"ProductCategory"[])
+        ORDER BY name
+        LIMIT 10
+      `;
+    }
+    return results;
   }
 
   return prisma.$queryRaw<ProductRaw[]>`
     SELECT id, name, brand, description, price::text as price,
            stock, "categoryType"::text, specifications,
            ts_rank(
-             to_tsvector('simple', name || ' ' || brand || ' ' || description),
+             to_tsvector('simple', name || ' ' || brand || ' ' || description || ' ' || COALESCE(specifications::text, '')),
              to_tsquery('simple', ${tsquery})
            ) AS rank
     FROM products
     WHERE "isActive" = true
-      AND to_tsvector('simple', name || ' ' || brand || ' ' || description)
+      AND to_tsvector('simple', name || ' ' || brand || ' ' || description || ' ' || COALESCE(specifications::text, ''))
           @@ to_tsquery('simple', ${tsquery})
     ORDER BY rank DESC
     LIMIT 10

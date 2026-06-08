@@ -51,6 +51,9 @@ export function ChatInterface() {
         { role: "assistant", content: data.reply },
       ]);
     } catch (err) {
+      // Rollback: scoate mesajul utilizatorului din chat și restaurează input-ul
+      setMessages(messages);
+      setInput(text);
       setError(err instanceof Error ? err.message : "Eroare de rețea.");
     } finally {
       setLoading(false);
