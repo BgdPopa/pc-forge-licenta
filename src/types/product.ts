@@ -13,7 +13,10 @@ export type ProductCardData = {
   price: number;
   shortDescription: string;
   inStock: boolean;
-  score?: number;
+  // Scoruri preț-performanță calculate server-side, per categorie, profil gaming.
+  // Opționale: absente pentru categorii fără atribute de scoring (CASE, PERIPHERAL etc.)
+  valueScore?: number;
+  performanceScore?: number;
 };
 
 // Etichete în română pentru valorile enum-ului ProductCategory.

@@ -5,6 +5,10 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { prisma } from "@/lib/prisma";
 import { categoryLabels, type ProductCardData } from "@/types/product";
+import { scoreProducts } from "@/lib/scoring/engine";
+import { extractAttributes, SCORABLE_CATEGORIES } from "@/lib/scoring/attributes";
+import { getWeights } from "@/lib/scoring/profiles";
+import type { ScoringInput, UsageProfile } from "@/lib/scoring/types";
 
 const PAGE_SIZE = 12;
 
@@ -91,16 +95,82 @@ export default async function CatalogPage({
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
   const brands = brandRows.map((row) => row.brand);
 
-  const products: ProductCardData[] = dbProducts.map((product) => ({
-    id: product.id,
-    slug: product.slug,
-    name: product.name,
-    brand: product.brand,
-    categoryLabel: categoryLabels[product.categoryType],
-    price: Number(product.price),
-    shortDescription: product.shortDescription ?? product.description,
-    inStock: product.stock > 0,
-  }));
+  // ── Scoring server-side ─────────────────────────────────────────────────
+  // Scorurile se calculează o singură dată pe setul COMPLET de produse active
+  // din fiecare categorie vizibilă pe pagina curentă. Astfel scorurile sunt
+  // stabile indiferent de pagina de catalog sau filtrele de preț/brand active.
+  // Categorii fără atribute de scoring (CASE, PERIPHERAL, ACCESSORY) sunt omise.
+  const SCORING_PROFILE: UsageProfile = "gaming";
+
+  const visibleCategories = Array.from(
+    new Set(dbProducts.map((p) => p.categoryType)),
+  ).filter((cat) => SCORABLE_CATEGORIES.includes(cat));
+
+  // Map<productId, { valueScore, performanceScore }>
+  const scoreByProductId = new Map<
+    string,
+    { valueScore: number; performanceScore: number }
+  >();
+
+  if (visibleCategories.length > 0) {
+    // Fetch toate produsele active din categoriile vizibile (nu doar pagina curentă)
+    const allCategoryProducts = await prisma.product.findMany({
+      where: { isActive: true, categoryType: { in: visibleCategories } },
+      select: {
+        id: true,
+        name: true,
+        brand: true,
+        price: true,
+        categoryType: true,
+        specifications: true,
+      },
+    });
+
+    // Grupare per categorie
+    const byCategory = new Map<ProductCategory, typeof allCategoryProducts>();
+    for (const p of allCategoryProducts) {
+      if (!byCategory.has(p.categoryType)) byCategory.set(p.categoryType, []);
+      byCategory.get(p.categoryType)!.push(p);
+    }
+
+    // Scoring per categorie — fiecare produs se compară doar cu cei din aceeași categorie
+    for (const [catType, catProducts] of Array.from(byCategory.entries())) {
+      const weights = getWeights(catType, SCORING_PROFILE);
+      const inputs: ScoringInput[] = catProducts.map((p) => ({
+        id: p.id,
+        name: p.name,
+        brand: p.brand,
+        price: Number(p.price),
+        categoryType: p.categoryType,
+        attributes: extractAttributes(
+          p.categoryType,
+          p.specifications as Record<string, unknown> | null,
+        ),
+      }));
+      for (const scored of scoreProducts(inputs, weights)) {
+        scoreByProductId.set(scored.id, {
+          valueScore: scored.valueScore,
+          performanceScore: scored.performanceScore,
+        });
+      }
+    }
+  }
+  // ────────────────────────────────────────────────────────────────────────
+
+  const products: ProductCardData[] = dbProducts.map((product) => {
+    const scores = scoreByProductId.get(product.id);
+    return {
+      id: product.id,
+      slug: product.slug,
+      name: product.name,
+      brand: product.brand,
+      categoryLabel: categoryLabels[product.categoryType],
+      price: Number(product.price),
+      shortDescription: product.shortDescription ?? product.description,
+      inStock: product.stock > 0,
+      ...(scores ?? {}),
+    };
+  });
 
   // Construiește un href păstrând filtrele curente, schimbând doar pagina.
   function buildPageHref(page: number): string {
@@ -139,7 +209,7 @@ export default async function CatalogPage({
             <form
               method="get"
               action="/catalog"
-              className="space-y-5 rounded-lg border border-zinc-800 bg-zinc-900 p-5"
+              className="space-y-5 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-4"
             >
               <div>
                 <label
