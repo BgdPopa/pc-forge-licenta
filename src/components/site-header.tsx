@@ -5,7 +5,7 @@ const navLinks = [
   { label: "Catalog", href: "/catalog" },
   { label: "Configurator", href: "/configurator" },
   { label: "Scoring", href: "/scoring" },
-  { label: "Agent AI", href: "#" },
+  { label: "Agent AI", href: "/agent" },
   { label: "Coș", href: "/cart" },
 ];
 
