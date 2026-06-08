@@ -14,7 +14,7 @@ export default function AgentPage() {
           Agent <span className="text-red-600">AI</span>
         </h1>
         <p className="mt-0.5 text-sm text-zinc-400">
-          Recomandări personalizate din catalogul PC Forge, alimentate de Claude AI.
+          Recomandări personalizate din catalogul PC Forge, alimentate de Gemini AI.
         </p>
       </div>
       <div className="flex-1 overflow-hidden">

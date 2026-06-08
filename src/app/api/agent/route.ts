@@ -199,8 +199,19 @@ export async function POST(req: NextRequest) {
     const assistantText = result.response.text();
 
     return NextResponse.json({ reply: assistantText });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("[agent] error:", error);
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "status" in error &&
+      (error as { status: number }).status === 429
+    ) {
+      return NextResponse.json(
+        { error: "Limita de cereri a fost atinsă. Încearcă din nou în câteva secunde." },
+        { status: 429 }
+      );
+    }
     return NextResponse.json(
       { error: "Eroare internă. Încearcă din nou." },
       { status: 500 }
