@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { ProductCategory } from "@prisma/client";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY ?? "");
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash-lite";
 
 interface Message {
   role: "user" | "assistant";
@@ -15,27 +15,76 @@ interface Message {
 // (categoria e filtrată deja prin enum) și stopwords funcționale ≥3 litere.
 // Termenii tehnici (ssd, nvme, gpu, rtx, ddr5 etc.) sunt păstrați în mod intenționat.
 const SKIP_WORDS = new Set([
-  "procesor", "procesoare",
-  "placă", "placa", "placi",
-  "memorie", "memorii",
+  "procesor",
+  "procesoare",
+  "placă",
+  "placa",
+  "placi",
+  "memorie",
+  "memorii",
   "stocare",
-  "sursă", "sursa",
-  "carcasă", "carcasa",
-  "răcire", "racire", "ventilator",
-  "periferic", "periferice",
-  "accesoriu", "accesorii",
+  "sursă",
+  "sursa",
+  "carcasă",
+  "carcasa",
+  "răcire",
+  "racire",
+  "ventilator",
+  "periferic",
+  "periferice",
+  "accesoriu",
+  "accesorii",
   // stopwords funcționale românești
-  "mai", "cel", "cea", "cei", "ale",
-  "bun", "buna", "bune", "buni", "bună",
-  "care", "pentru", "sau", "din", "una",
-  "vreau", "vrei", "vrea",
-  "cumpar", "cumpăr", "cumpara", "cumpără",
-  "recomanda", "recomandă", "recomandati", "recomandați",
-  "costa", "costă", "cat", "cât", "pret", "preț",
-  "poti", "poți", "spune",
-  "toate", "toti", "toți", "toata", "toată",
-  "este", "esti", "ești", "sunt", "avem", "aveti", "aveți",
-  "orice", "imi", "îmi",
+  "mai",
+  "cel",
+  "cea",
+  "cei",
+  "ale",
+  "bun",
+  "buna",
+  "bune",
+  "buni",
+  "bună",
+  "care",
+  "pentru",
+  "sau",
+  "din",
+  "una",
+  "vreau",
+  "vrei",
+  "vrea",
+  "cumpar",
+  "cumpăr",
+  "cumpara",
+  "cumpără",
+  "recomanda",
+  "recomandă",
+  "recomandati",
+  "recomandați",
+  "costa",
+  "costă",
+  "cat",
+  "cât",
+  "pret",
+  "preț",
+  "poti",
+  "poți",
+  "spune",
+  "toate",
+  "toti",
+  "toți",
+  "toata",
+  "toată",
+  "este",
+  "esti",
+  "ești",
+  "sunt",
+  "avem",
+  "aveti",
+  "aveți",
+  "orice",
+  "imi",
+  "îmi",
 ]);
 
 // Mapare termeni româno-englezi → valori enum ProductCategory
@@ -211,7 +260,7 @@ export async function POST(req: NextRequest) {
     if (!message.trim()) {
       return NextResponse.json(
         { error: "Mesajul nu poate fi gol." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -250,13 +299,16 @@ export async function POST(req: NextRequest) {
       (error as { status: number }).status === 429
     ) {
       return NextResponse.json(
-        { error: "Limita de cereri a fost atinsă. Încearcă din nou în câteva secunde." },
-        { status: 429 }
+        {
+          error:
+            "Limita de cereri a fost atinsă. Încearcă din nou în câteva secunde.",
+        },
+        { status: 429 },
       );
     }
     return NextResponse.json(
       { error: "Eroare internă. Încearcă din nou." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
