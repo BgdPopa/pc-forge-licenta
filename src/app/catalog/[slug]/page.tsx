@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { AddToCartButton } from "@/components/add-to-cart-button";
+import { ProductVisual } from "@/components/product-visual";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { categoryLabels } from "@/types/product";
@@ -126,31 +127,46 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <span className="text-zinc-300">{product.name}</span>
         </nav>
 
-        <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
-          {/* Informații principale */}
-          <div>
-            {/* Fallback vizual produs */}
-            <div className="mb-6 flex h-48 items-center justify-center rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900 to-red-950/20">
-              <div className="text-center">
-                <p className="text-4xl font-bold tracking-widest text-red-600/50">
-                  {categoryLabel.slice(0, 3).toUpperCase()}
-                </p>
-                <p className="mt-2 text-sm text-zinc-500">{categoryLabel}</p>
-              </div>
-            </div>
+        {/* Rândul de sus: visual + panou preț */}
+        <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
+          <ProductVisual
+            category={product.categoryType}
+            slug={product.slug}
+            size="detail"
+          />
 
-            <span className="rounded-md bg-zinc-900 px-2 py-1 text-xs font-medium text-red-500">
+          {/* Panou preț, stoc și coș — sticky pe desktop */}
+          <aside className="h-fit rounded-xl border border-zinc-800 bg-zinc-900 p-6 lg:sticky lg:top-24">
+            <span className="inline-block rounded-md bg-zinc-800 px-2.5 py-1 text-xs font-medium text-red-400">
               {categoryLabel}
             </span>
-            <p className="mt-4 text-sm uppercase tracking-wide text-zinc-500">
+            <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
               {product.brand}
             </p>
-            <h1 className="mt-1 text-3xl font-bold tracking-tight">
+            <h1 className="mt-1 text-xl font-bold leading-snug tracking-tight text-zinc-100 lg:text-2xl">
               {product.name}
             </h1>
-            <p className="mt-4 leading-relaxed text-zinc-300">
-              {product.description}
+
+            <div className="mt-5 border-t border-zinc-800 pt-5">
+              <p className="text-xs text-zinc-500">Preț</p>
+              <p className="mt-1 text-3xl font-bold text-red-500">
+                {formatPrice(Number(product.price))}
+              </p>
+            </div>
+
+            <p className={`mt-3 flex items-center gap-1.5 text-sm font-medium ${inStock ? "text-emerald-400" : "text-zinc-500"}`}>
+              <span className={`h-2 w-2 rounded-full ${inStock ? "bg-emerald-400" : "bg-zinc-600"}`} />
+              {inStock ? `În stoc (${product.stock} buc.)` : "Stoc epuizat"}
             </p>
+
+            <AddToCartButton productId={product.id} inStock={inStock} />
+          </aside>
+        </div>
+
+        {/* Descriere + specificații */}
+        <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
+          <div>
+            <p className="leading-relaxed text-zinc-300">{product.description}</p>
 
             {componentSpecs.length > 0 && (
               <section className="mt-10">
@@ -159,14 +175,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 </h2>
                 <dl className="mt-4 divide-y divide-zinc-800 rounded-lg border border-zinc-800">
                   {componentSpecs.map((spec) => (
-                    <div
-                      key={spec.label}
-                      className="flex justify-between gap-4 px-4 py-3"
-                    >
+                    <div key={spec.label} className="flex justify-between gap-4 px-4 py-3">
                       <dt className="text-sm text-zinc-400">{spec.label}</dt>
-                      <dd className="text-sm font-medium text-zinc-100">
-                        {spec.value}
-                      </dd>
+                      <dd className="text-sm font-medium text-zinc-100">{spec.value}</dd>
                     </div>
                   ))}
                 </dl>
@@ -180,16 +191,9 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 </h2>
                 <dl className="mt-4 divide-y divide-zinc-800 rounded-lg border border-zinc-800">
                   {extraSpecs.map((spec) => (
-                    <div
-                      key={spec.label}
-                      className="flex justify-between gap-4 px-4 py-3"
-                    >
-                      <dt className="text-sm text-zinc-400">
-                        {spec.label}
-                      </dt>
-                      <dd className="text-sm font-medium text-zinc-100">
-                        {spec.value}
-                      </dd>
+                    <div key={spec.label} className="flex justify-between gap-4 px-4 py-3">
+                      <dt className="text-sm text-zinc-400">{spec.label}</dt>
+                      <dd className="text-sm font-medium text-zinc-100">{spec.value}</dd>
                     </div>
                   ))}
                 </dl>
@@ -197,23 +201,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
             )}
           </div>
 
-          {/* Panou preț și stoc */}
-          <aside className="h-fit rounded-lg border border-zinc-800 bg-zinc-900 p-6 lg:sticky lg:top-24">
-            <p className="text-sm text-zinc-500">Preț</p>
-            <p className="mt-1 text-3xl font-bold text-red-500">
-              {formatPrice(Number(product.price))}
-            </p>
-
-            <p
-              className={`mt-4 text-sm font-medium ${
-                inStock ? "text-emerald-400" : "text-zinc-500"
-              }`}
-            >
-              {inStock ? `În stoc (${product.stock} buc.)` : "Stoc epuizat"}
-            </p>
-
-            <AddToCartButton productId={product.id} inStock={inStock} />
-          </aside>
+          {/* Coloana dreapta jos — intenționat goală, rezervat pentru viitor */}
+          <div />
         </div>
 
         <div className="mt-12">

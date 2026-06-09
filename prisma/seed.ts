@@ -400,6 +400,322 @@ const products: ProductSeed[] = [
     stock: 80,
     specifications: { weight: "4 g" },
   },
+
+  // ── Produse noi ────────────────────────────────────────────────────────────
+
+  // CPU suplimentare
+  {
+    categoryType: "CPU",
+    name: "AMD Ryzen 5 5600",
+    slug: "amd-ryzen-5-5600",
+    brand: "AMD",
+    description:
+      "Procesor cu 6 nuclee pe platforma AM4, excelent raport preț-performanță pentru gaming la 1080p și 1440p pe sistemele DDR4 existente.",
+    shortDescription: "6 nuclee / 12 fire, socket AM4, DDR4.",
+    price: 599,
+    stock: 20,
+    specifications: {
+      cores: 6,
+      threads: 12,
+      baseClock: "3.5 GHz",
+      boostClock: "4.4 GHz",
+    },
+    component: { socket: "AM4", tdpWatts: 65 },
+  },
+  {
+    categoryType: "CPU",
+    name: "AMD Ryzen 7 7800X3D",
+    slug: "amd-ryzen-7-7800x3d",
+    brand: "AMD",
+    description:
+      "Cel mai rapid procesor gaming pe socket AM5, cu tehnologie 3D V-Cache care aduce câștiguri semnificative în titluri competitive.",
+    shortDescription: "8 nuclee, AM5, 3D V-Cache, gaming king.",
+    price: 1699,
+    stock: 8,
+    specifications: {
+      cores: 8,
+      threads: 16,
+      baseClock: "4.5 GHz",
+      boostClock: "5.0 GHz",
+    },
+    component: { socket: "AM5", tdpWatts: 120 },
+  },
+  {
+    categoryType: "CPU",
+    name: "Intel Core i7-13700F",
+    slug: "intel-core-i7-13700f",
+    brand: "Intel",
+    description:
+      "Procesor de generația 13 cu 16 nuclee (8P+8E) pe socket LGA1700, performanță ridicată atât în gaming, cât și în sarcini de creație.",
+    shortDescription: "16 nuclee, socket LGA1700, fără grafică integrată.",
+    price: 1199,
+    stock: 14,
+    specifications: {
+      cores: 16,
+      threads: 24,
+      baseClock: "2.1 GHz",
+      boostClock: "5.2 GHz",
+    },
+    component: { socket: "LGA1700", tdpWatts: 65 },
+  },
+
+  // GPU suplimentare
+  {
+    categoryType: "GPU",
+    name: "NVIDIA GeForce RTX 3060 12GB",
+    slug: "nvidia-geforce-rtx-3060-12gb",
+    brand: "NVIDIA",
+    description:
+      "Placă video cu 12 GB VRAM, excelentă pentru gaming Full HD și 1440p la setări medii-înalte, cu suport ray tracing.",
+    shortDescription: "12GB GDDR6, gaming 1080p/1440p, RTX.",
+    price: 1199,
+    stock: 15,
+    specifications: { vram: "12 GB GDDR6", interface: "PCIe 4.0" },
+    component: { tdpWatts: 170, lengthMm: 242 },
+  },
+  {
+    categoryType: "GPU",
+    name: "NVIDIA GeForce RTX 4070",
+    slug: "nvidia-geforce-rtx-4070",
+    brand: "NVIDIA",
+    description:
+      "Placă video high-end din generația Ada Lovelace, cu 12 GB GDDR6X și suport DLSS 3 pentru gaming 1440p/4K fluid.",
+    shortDescription: "12GB GDDR6X, DLSS 3, 1440p/4K.",
+    price: 2499,
+    stock: 6,
+    specifications: { vram: "12 GB GDDR6X", interface: "PCIe 4.0" },
+    component: { tdpWatts: 200, lengthMm: 285 },
+  },
+  {
+    categoryType: "GPU",
+    name: "AMD Radeon RX 6700 XT",
+    slug: "amd-radeon-rx-6700-xt",
+    brand: "AMD",
+    description:
+      "Placă video cu arhitectură RDNA 2 și 12 GB VRAM, optimizată pentru gaming la 1440p cu rate de cadre ridicate.",
+    shortDescription: "12GB GDDR6, RDNA 2, gaming 1440p.",
+    price: 1299,
+    stock: 10,
+    specifications: { vram: "12 GB GDDR6", interface: "PCIe 4.0" },
+    component: { tdpWatts: 230, lengthMm: 267 },
+  },
+
+  // Plăci de bază suplimentare
+  {
+    categoryType: "MOTHERBOARD",
+    name: "MSI B450 TOMAHAWK MAX II",
+    slug: "msi-b450-tomahawk-max-ii",
+    brand: "MSI",
+    description:
+      "Placă de bază ATX pentru socket AM4, cu suport DDR4 și compatibilitate cu procesoarele AMD Ryzen din generațiile 3, 5 și 7.",
+    shortDescription: "Socket AM4, DDR4, ATX, chipset B450.",
+    price: 549,
+    stock: 12,
+    specifications: { chipset: "B450", memorySlots: 4, maxMemory: "128 GB" },
+    component: { socket: "AM4", ramType: "DDR4", formFactor: "ATX" },
+  },
+  {
+    categoryType: "MOTHERBOARD",
+    name: "ASUS TUF Gaming B650-PLUS WiFi",
+    slug: "asus-tuf-gaming-b650-plus-wifi",
+    brand: "ASUS",
+    description:
+      "Placă de bază ATX pentru socket AM5 cu chipset B650, suport DDR5, Wi-Fi 6 și faze de alimentare robuste pentru procesoarele Ryzen 7000.",
+    shortDescription: "Socket AM5, DDR5, ATX, Wi-Fi 6.",
+    price: 1099,
+    stock: 9,
+    specifications: { chipset: "B650", memorySlots: 4, maxMemory: "128 GB" },
+    component: { socket: "AM5", ramType: "DDR5", formFactor: "ATX" },
+  },
+  {
+    categoryType: "MOTHERBOARD",
+    name: "Gigabyte B760 Gaming X DDR4",
+    slug: "gigabyte-b760-gaming-x-ddr4",
+    brand: "Gigabyte",
+    description:
+      "Placă de bază ATX pe socket LGA1700 cu suport DDR4, ideală pentru cei care migrează de pe platformele anterioare păstrând memoria DDR4.",
+    shortDescription: "Socket LGA1700, DDR4, ATX, chipset B760.",
+    price: 799,
+    stock: 11,
+    specifications: { chipset: "B760", memorySlots: 4, maxMemory: "128 GB" },
+    component: { socket: "LGA1700", ramType: "DDR4", formFactor: "ATX" },
+  },
+
+  // RAM suplimentare
+  {
+    categoryType: "RAM",
+    name: "G.Skill Ripjaws V 16GB DDR4 3600",
+    slug: "gskill-ripjaws-v-16gb-ddr4-3600",
+    brand: "G.Skill",
+    description:
+      "Kit de memorie 2x8GB DDR4 la 3600 MHz, cu profil XMP 2.0 și latențe mici, recomandat pentru platformele AM4 și LGA1700 DDR4.",
+    shortDescription: "2x8GB DDR4, 3600 MHz, XMP 2.0.",
+    price: 239,
+    stock: 28,
+    specifications: { capacity: "16 GB", speed: "3600 MHz", modules: 2 },
+    component: { ramType: "DDR4" },
+  },
+  {
+    categoryType: "RAM",
+    name: "Kingston Fury Beast 32GB DDR4 3200",
+    slug: "kingston-fury-beast-32gb-ddr4-3200",
+    brand: "Kingston",
+    description:
+      "Kit de memorie 2x16GB DDR4 la 3200 MHz, soluție DDR4 de capacitate mare pentru stații de lucru și editing video pe platforme AM4 sau LGA1700.",
+    shortDescription: "2x16GB DDR4, 3200 MHz.",
+    price: 379,
+    stock: 18,
+    specifications: { capacity: "32 GB", speed: "3200 MHz", modules: 2 },
+    component: { ramType: "DDR4" },
+  },
+
+  // Stocare suplimentară
+  {
+    categoryType: "STORAGE",
+    name: "Samsung 970 EVO Plus 1TB",
+    slug: "samsung-970-evo-plus-1tb",
+    brand: "Samsung",
+    description:
+      "SSD M.2 NVMe de 1TB din a doua generație V-NAND cu viteze de până la 3500 MB/s la citire, potrivit pentru sistemul de operare și jocuri.",
+    shortDescription: "1TB M.2 NVMe PCIe 3.0, 3500 MB/s citire.",
+    price: 449,
+    stock: 32,
+    specifications: {
+      capacity: "1 TB",
+      readSpeed: "3500 MB/s",
+      writeSpeed: "3300 MB/s",
+    },
+    component: { interfaceType: "M.2 NVMe" },
+  },
+  {
+    categoryType: "STORAGE",
+    name: "Kingston NV2 1TB NVMe",
+    slug: "kingston-nv2-1tb-nvme",
+    brand: "Kingston",
+    description:
+      "SSD M.2 NVMe PCIe 4.0 de 1TB la un preț accesibil, recomandat ca drive secundar sau soluție de buget pentru sistemul de operare.",
+    shortDescription: "1TB M.2 NVMe PCIe 4.0, buget.",
+    price: 279,
+    stock: 45,
+    specifications: {
+      capacity: "1 TB",
+      readSpeed: "3500 MB/s",
+      writeSpeed: "2100 MB/s",
+    },
+    component: { interfaceType: "M.2 NVMe" },
+  },
+
+  // Surse suplimentare
+  {
+    categoryType: "PSU",
+    name: "be quiet! Pure Power 12 M 650W",
+    slug: "be-quiet-pure-power-12m-650w",
+    brand: "be quiet!",
+    description:
+      "Sursă de 650W semi-modulară cu certificare 80+ Gold și ventilatoare silențioase, potrivită pentru sisteme mid-range.",
+    shortDescription: "650W, 80+ Gold, semi-modulară, silențioasă.",
+    price: 399,
+    stock: 14,
+    specifications: {
+      wattage: "650 W",
+      certification: "80+ Gold",
+      modular: false,
+    },
+    component: { powerWatts: 650, formFactor: "ATX" },
+  },
+  {
+    categoryType: "PSU",
+    name: "Corsair CX650 650W",
+    slug: "corsair-cx650-650w",
+    brand: "Corsair",
+    description:
+      "Sursă de 650W non-modulară cu certificare 80+ Bronze, soluție de buget pentru sisteme de putere medie.",
+    shortDescription: "650W, 80+ Bronze, non-modulară.",
+    price: 319,
+    stock: 19,
+    specifications: {
+      wattage: "650 W",
+      certification: "80+ Bronze",
+      modular: false,
+    },
+    component: { powerWatts: 650, formFactor: "ATX" },
+  },
+
+  // Carcasă suplimentară
+  {
+    categoryType: "CASE",
+    name: "Fractal Design Pop Air",
+    slug: "fractal-design-pop-air",
+    brand: "Fractal Design",
+    description:
+      "Carcasă ATX mid-tower cu panou frontal mesh și panou lateral din sticlă călită, livrată cu trei ventilatoare de 120 mm.",
+    shortDescription: "Mid-tower ATX, mesh front, trei ventilatoare incluse.",
+    price: 399,
+    stock: 7,
+    specifications: { type: "Mid-Tower" },
+    component: {
+      formFactor: "ATX",
+      metadata: { maxGpuLengthMm: 360, maxCoolerHeightMm: 168 },
+    },
+  },
+
+  // Cooler suplimentar
+  {
+    categoryType: "COOLER",
+    name: "DeepCool AK400",
+    slug: "deepcool-ak400",
+    brand: "DeepCool",
+    description:
+      "Cooler air cu patru heatpipe-uri, ventilator de 120 mm și suport pentru socket AM4, AM5 și LGA1700. Raport calitate-preț excelent.",
+    shortDescription: "Air cooler, 4 heatpipe, AM4/AM5/LGA1700.",
+    price: 169,
+    stock: 25,
+    specifications: { type: "Air", fanSize: "120 mm" },
+    component: {
+      heightMm: 155,
+      metadata: { supportedTdpWatts: 220, sockets: ["AM4", "AM5", "LGA1700"] },
+    },
+  },
+
+  // Periferic suplimentar
+  {
+    categoryType: "PERIPHERAL",
+    name: "Logitech G305 Lightspeed",
+    slug: "logitech-g305-lightspeed",
+    brand: "Logitech",
+    description:
+      "Mouse de gaming wireless ultraușor cu tehnologie LIGHTSPEED pentru latență sub 1ms și baterie cu autonomie de până la 250 de ore.",
+    shortDescription: "Mouse gaming wireless, senzor HERO 12K, ultraușor.",
+    price: 199,
+    stock: 40,
+    specifications: { dpi: 12000, buttons: 6, connectivity: "Wireless LIGHTSPEED" },
+  },
+
+  // Accesorii suplimentare
+  {
+    categoryType: "ACCESSORY",
+    name: "Noctua NT-H1 Pastă termică",
+    slug: "noctua-nt-h1-pasta-termica",
+    brand: "Noctua",
+    description:
+      "Pastă termică premium pentru procesoare și plăci video, cu conductivitate termică ridicată și durabilitate îndelungată.",
+    shortDescription: "Pastă termică premium, conductivitate ridicată.",
+    price: 49,
+    stock: 60,
+    specifications: { weight: "3.5 g" },
+  },
+  {
+    categoryType: "ACCESSORY",
+    name: "Sabrent Hub USB 3.0 4 porturi",
+    slug: "sabrent-hub-usb-4-porturi",
+    brand: "Sabrent",
+    description:
+      "Hub USB 3.0 cu 4 porturi și alimentare independentă pentru perifericele conexe la carcasa PC-ului.",
+    shortDescription: "4x USB 3.0, alimentare independentă.",
+    price: 69,
+    stock: 35,
+    specifications: { connectivity: "USB 3.0", type: "Hub" },
+  },
 ];
 
 type RuleSeed = {
