@@ -94,10 +94,37 @@ export function ConfiguratorClient({ slots, products, constraints }: Props) {
     setSelection({});
   }
 
+  const totalSlots = slots.length;
+  const progressPercent = totalSlots > 0 ? Math.round((selectedCount / totalSlots) * 100) : 0;
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_340px]">
       {/* Sloturi de selecție */}
       <div className="space-y-4">
+        {/* Progress indicator */}
+        <div className="rounded-lg border border-zinc-800 bg-zinc-900 p-4">
+          <div className="flex items-center justify-between text-sm">
+            <span className="font-medium text-zinc-300">Configurație</span>
+            <span className="text-zinc-400">
+              <span className="font-semibold text-zinc-100">{selectedCount}</span>
+              {" / "}
+              <span>{totalSlots}</span>
+              {" componente selectate"}
+            </span>
+          </div>
+          <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+            <div
+              className="h-full rounded-full bg-red-600 transition-all duration-300"
+              style={{ width: `${progressPercent}%` }}
+            />
+          </div>
+          {selectedCount === totalSlots && (
+            <p className="mt-2 text-xs font-medium text-emerald-400">
+              Toate componentele au fost selectate.
+            </p>
+          )}
+        </div>
+
         {slots.map((category) => {
           const options = productsByCategory.get(category) ?? [];
           const selectedId = selection[category] ?? "";

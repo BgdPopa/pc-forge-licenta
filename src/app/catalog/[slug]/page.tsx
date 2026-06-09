@@ -62,6 +62,35 @@ export default async function ProductDetailPage({ params }: PageProps) {
     push("Lățime", c.widthMm != null ? `${c.widthMm} mm` : null);
   }
 
+  const specLabels: Record<string, string> = {
+    cores: "Nuclee",
+    threads: "Fire de execuție",
+    baseClock: "Frecvență de bază",
+    boostClock: "Frecvență boost",
+    vram: "Memorie video",
+    capacity: "Capacitate",
+    speed: "Frecvență",
+    modules: "Module",
+    readSpeed: "Viteză citire",
+    writeSpeed: "Viteză scriere",
+    wattage: "Putere",
+    certification: "Certificare",
+    modular: "Modular",
+    chipset: "Chipset",
+    memorySlots: "Sloturi memorie",
+    maxMemory: "Memorie maximă",
+    fanSize: "Ventilator",
+    rpm: "Turație",
+    dpi: "DPI maxim",
+    buttons: "Butoane",
+    layout: "Layout",
+    connectivity: "Conectivitate",
+    weight: "Greutate",
+    interface: "Interfață",
+    type: "Tip",
+    profile: "Profil",
+  };
+
   // Specificații libere din câmpul Json `specifications`.
   const extraSpecs: SpecRow[] = [];
   const rawSpecs = product.specifications;
@@ -69,7 +98,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
     for (const [key, value] of Object.entries(rawSpecs as Record<string, unknown>)) {
       if (value === null || value === undefined) continue;
       const display = typeof value === "boolean" ? (value ? "Da" : "Nu") : String(value);
-      extraSpecs.push({ label: key, value: display });
+      extraSpecs.push({ label: specLabels[key] ?? key, value: display });
     }
   }
 
@@ -100,6 +129,16 @@ export default async function ProductDetailPage({ params }: PageProps) {
         <div className="grid gap-10 lg:grid-cols-[1fr_320px]">
           {/* Informații principale */}
           <div>
+            {/* Fallback vizual produs */}
+            <div className="mb-6 flex h-48 items-center justify-center rounded-xl border border-zinc-800 bg-gradient-to-br from-zinc-900 via-zinc-900 to-red-950/20">
+              <div className="text-center">
+                <p className="text-4xl font-bold tracking-widest text-red-600/50">
+                  {categoryLabel.slice(0, 3).toUpperCase()}
+                </p>
+                <p className="mt-2 text-sm text-zinc-500">{categoryLabel}</p>
+              </div>
+            </div>
+
             <span className="rounded-md bg-zinc-900 px-2 py-1 text-xs font-medium text-red-500">
               {categoryLabel}
             </span>
@@ -145,7 +184,7 @@ export default async function ProductDetailPage({ params }: PageProps) {
                       key={spec.label}
                       className="flex justify-between gap-4 px-4 py-3"
                     >
-                      <dt className="text-sm capitalize text-zinc-400">
+                      <dt className="text-sm text-zinc-400">
                         {spec.label}
                       </dt>
                       <dd className="text-sm font-medium text-zinc-100">

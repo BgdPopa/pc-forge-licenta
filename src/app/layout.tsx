@@ -18,6 +18,13 @@ export const metadata: Metadata = {
   title: "PC Forge — componente și periferice pentru calculator",
   description:
     "Magazin online de componente IT cu configurator CSP, scoring preț-performanță și agent AI.",
+  icons: {
+    icon: [
+      { url: "/images/favicon.png", type: "image/png" },
+    ],
+    shortcut: ["/images/favicon.png"],
+    apple: ["/images/favicon.png"],
+  },
 };
 
 export default function RootLayout({
