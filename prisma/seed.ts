@@ -323,7 +323,7 @@ const products: ProductSeed[] = [
     specifications: { type: "Mini-Tower" },
     component: {
       formFactor: "Micro-ATX",
-      metadata: { maxGpuLengthMm: 320, maxCoolerHeightMm: 160 },
+      metadata: { maxGpuLengthMm: 275, maxCoolerHeightMm: 160 },
     },
   },
 
@@ -641,6 +641,25 @@ const products: ProductSeed[] = [
     component: { powerWatts: 650, formFactor: "ATX" },
   },
 
+  // PSU buget (folosit pentru scenariul de demo putere insuficientă)
+  {
+    categoryType: "PSU",
+    name: "FSP Hyper Pro 400W",
+    slug: "fsp-hyper-pro-400w",
+    brand: "FSP",
+    description:
+      "Sursă de alimentare 400W non-modulară, pentru configurații de buget redus. Notă: verifică consumul total înainte de utilizare cu componente de clasă mid-range.",
+    shortDescription: "400W, non-modulară, entry-level.",
+    price: 149,
+    stock: 22,
+    specifications: {
+      wattage: "400 W",
+      certification: "80+",
+      modular: false,
+    },
+    component: { powerWatts: 400, formFactor: "ATX" },
+  },
+
   // Carcasă suplimentară
   {
     categoryType: "CASE",
@@ -779,6 +798,30 @@ const compatibilityRules: RuleSeed[] = [
     sourceField: "heightMm",
     targetField: "maxCoolerHeightMm",
     operator: "LESS_OR_EQUAL",
+  },
+  {
+    id: "rule-gpu-length-supported",
+    name: "Lungime placă video compatibilă cu carcasa",
+    description:
+      "Lungimea plăcii video nu trebuie să depășească lungimea maximă admisă de carcasă.",
+    ruleType: "GPU_LENGTH_SUPPORTED",
+    sourceType: "GPU",
+    targetType: "CASE",
+    sourceField: "lengthMm",
+    targetField: "maxGpuLengthMm",
+    operator: "LESS_OR_EQUAL",
+  },
+  {
+    id: "rule-cooler-socket-compatible",
+    name: "Socket cooler compatibil cu procesorul",
+    description:
+      "Cooler-ul trebuie să suporte socket-ul procesorului ales (verificare pe lista de socket-uri declarată de producător).",
+    ruleType: "CUSTOM",
+    sourceType: "CPU",
+    targetType: "COOLER",
+    sourceField: "socket",
+    targetField: "sockets",
+    operator: "CONTAINS",
   },
 ];
 

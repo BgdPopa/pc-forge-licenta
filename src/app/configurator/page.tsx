@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { ProductCategory } from "@prisma/client";
+import { getServerSession } from "next-auth";
 import { prisma } from "@/lib/prisma";
+import { authOptions } from "@/lib/auth";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import {
@@ -69,7 +71,8 @@ function toComponentData(
 }
 
 export default async function ConfiguratorPage() {
-  const [dbProducts, dbRules] = await Promise.all([
+  const [session, dbProducts, dbRules] = await Promise.all([
+    getServerSession(authOptions),
     prisma.product.findMany({
       where: { isActive: true, categoryType: { in: BUILD_SLOTS } },
       include: { component: true },
@@ -98,6 +101,8 @@ export default async function ConfiguratorPage() {
     operator: rule.operator,
   }));
 
+  const userId = session?.user?.id ?? null;
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100">
       <SiteHeader />
@@ -108,7 +113,8 @@ export default async function ConfiguratorPage() {
           <p className="mt-2 max-w-2xl text-zinc-400">
             Alege componentele dorite, iar compatibilitatea este verificată
             automat ca o problemă de satisfacere a constrângerilor (CSP):
-            socket procesor, tip memorie, putere sursă și dimensiuni de răcire.
+            socket procesor, tip memorie, putere sursă, lungime GPU și
+            înălțime cooler. Consumul total estimat este calculat separat.
           </p>
         </div>
 
@@ -116,6 +122,7 @@ export default async function ConfiguratorPage() {
           slots={BUILD_SLOTS}
           products={products}
           constraints={constraints}
+          userId={userId}
         />
       </main>
 
