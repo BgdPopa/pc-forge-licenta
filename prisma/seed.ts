@@ -105,6 +105,18 @@ type ProductSeed = {
   component?: ComponentSeed;
 };
 
+const productImageExtensions: Record<string, string> = {
+  "amd-ryzen-5-7600": "webp",
+  "nvidia-geforce-rtx-4060": "webp",
+  "amd-ryzen-5-5600": "png",
+  "nvidia-geforce-rtx-3060-12gb": "png",
+  "fsp-hyper-pro-400w": "png",
+};
+
+function productImagePath(slug: string): string {
+  return `/images/products/${slug}.${productImageExtensions[slug] ?? "jpg"}`;
+}
+
 const products: ProductSeed[] = [
   // Procesoare
   {
@@ -919,6 +931,7 @@ async function main() {
         brand: product.brand,
         description: product.description,
         shortDescription: product.shortDescription,
+        imageUrl: productImagePath(product.slug),
         price: product.price,
         stock: product.stock,
         categoryId,
@@ -932,6 +945,7 @@ async function main() {
         brand: product.brand,
         description: product.description,
         shortDescription: product.shortDescription,
+        imageUrl: productImagePath(product.slug),
         price: product.price,
         stock: product.stock,
         categoryId,

@@ -163,6 +163,7 @@ export default async function CatalogPage({
       slug: product.slug,
       name: product.name,
       brand: product.brand,
+      imageUrl: product.imageUrl,
       categoryLabel: categoryLabels[product.categoryType],
       price: Number(product.price),
       shortDescription: product.shortDescription ?? product.description,

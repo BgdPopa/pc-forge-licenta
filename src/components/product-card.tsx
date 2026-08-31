@@ -25,6 +25,8 @@ export function ProductCard({ product }: ProductCardProps) {
           <ProductVisual
             category={product.categoryLabel}
             slug={product.slug}
+            imageUrl={product.imageUrl}
+            alt={product.name}
             size="card"
           />
         </div>

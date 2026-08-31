@@ -9,6 +9,7 @@ export type ProductCardData = {
   slug: string;
   name: string;
   brand: string;
+  imageUrl: string | null;
   categoryLabel: string;
   price: number;
   shortDescription: string;

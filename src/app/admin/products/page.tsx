@@ -26,6 +26,7 @@ export default async function AdminProductsPage() {
     slug: p.slug,
     categoryName: p.category.name,
     categoryType: p.categoryType,
+    imageUrl: p.imageUrl,
     price: Number(p.price),
     stock: p.stock,
     isActive: p.isActive,

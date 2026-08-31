@@ -8,6 +8,7 @@ import { SiteFooter } from "@/components/site-footer";
 import { formatPrice } from "@/lib/format";
 import { retrieveAndReconcileStripeOrder } from "@/lib/order-payment";
 import { PaymentStatus } from "@/components/payment-status";
+import { ProductVisual } from "@/components/product-visual";
 
 type PageProps = {
   searchParams: { orderId?: string; session_id?: string };
@@ -26,7 +27,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
 
   let order = await prisma.order.findUnique({
     where: { id: orderId },
-    include: { items: true },
+    include: { items: { include: { product: true } } },
   });
 
   // Verificare ownership: comanda trebuie să aparțină utilizatorului curent.
@@ -46,7 +47,7 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
       await retrieveAndReconcileStripeOrder(searchParams.session_id);
       const refreshedOrder = await prisma.order.findUnique({
         where: { id: order.id },
-        include: { items: true },
+        include: { items: { include: { product: true } } },
       });
       if (refreshedOrder) order = refreshedOrder;
     } catch (error) {
@@ -105,10 +106,10 @@ export default async function CheckoutSuccessPage({ searchParams }: PageProps) {
 
           <ul className="mt-6 space-y-3 border-t border-zinc-800 pt-4">
             {order.items.map((item) => (
-              <li key={item.id} className="flex justify-between gap-3 text-sm">
-                <span className="min-w-0 text-zinc-400">
-                  {item.productName}
-                  <span className="text-zinc-600"> × {item.quantity}</span>
+              <li key={item.id} className="flex items-center justify-between gap-3 text-sm">
+                <span className="flex min-w-0 items-center gap-3 text-zinc-400">
+                  <span className="w-16 shrink-0"><ProductVisual category={item.product.categoryType} slug={item.product.slug} imageUrl={item.product.imageUrl} alt={item.productName} size="thumbnail" /></span>
+                  <span>{item.productName}<span className="text-zinc-600"> × {item.quantity}</span></span>
                 </span>
                 <span className="whitespace-nowrap font-medium text-zinc-200">
                   {formatPrice(Number(item.totalPrice))}

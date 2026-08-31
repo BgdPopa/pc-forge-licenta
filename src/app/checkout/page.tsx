@@ -6,12 +6,16 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ProductVisual } from "@/components/product-visual";
 import { formatPrice } from "@/lib/format";
 
 type CartItem = {
   id: string;
+  slug: string;
   name: string;
   brand: string;
+  imageUrl: string | null;
+  categoryType: string;
   price: number;
   quantity: number;
   subtotal: number;
@@ -195,10 +199,12 @@ export default function CheckoutPage() {
               <h2 className="mb-4 text-lg font-semibold">Sumar comandă</h2>
               <ul className="space-y-3">
                 {cart.items.map((item) => (
-                  <li key={item.id} className="flex justify-between gap-3 text-sm">
-                    <span className="min-w-0 text-zinc-400">
-                      {item.name}
-                      <span className="text-zinc-600"> × {item.quantity}</span>
+                  <li key={item.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="flex min-w-0 items-center gap-3 text-zinc-400">
+                      <span className="w-16 shrink-0">
+                        <ProductVisual category={item.categoryType} slug={item.slug} imageUrl={item.imageUrl} alt={item.name} size="thumbnail" />
+                      </span>
+                      <span className="min-w-0">{item.name}<span className="text-zinc-600"> × {item.quantity}</span></span>
                     </span>
                     <span className="whitespace-nowrap font-medium text-zinc-200">
                       {formatPrice(item.subtotal)}

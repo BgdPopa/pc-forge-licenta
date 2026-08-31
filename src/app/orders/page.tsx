@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ProductVisual } from "@/components/product-visual";
 
 export const metadata = { title: "Comenzile mele — PC Forge" };
 
@@ -27,7 +28,13 @@ export default async function OrdersPage() {
 
   const orders = await prisma.order.findMany({
     where: { userId: session.user.id },
-    include: { _count: { select: { items: true } } },
+    include: {
+      items: {
+        take: 3,
+        include: { product: { select: { slug: true, imageUrl: true, categoryType: true } } },
+      },
+      _count: { select: { items: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 
@@ -54,6 +61,13 @@ export default async function OrdersPage() {
                     <p className="font-mono text-xs text-zinc-600">{order.id}</p>
                     <p className="mt-1 text-sm text-zinc-400">{new Date(order.createdAt).toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
                     <p className="mt-2 text-xs text-zinc-500">{order._count.items} poziții · {ORDER_LABELS[order.status] ?? order.status}</p>
+                    <div className="mt-3 flex gap-2">
+                      {order.items.map((item) => (
+                        <div key={item.id} className="w-14">
+                          <ProductVisual category={item.product.categoryType} slug={item.product.slug} imageUrl={item.product.imageUrl} alt={item.productName} size="thumbnail" />
+                        </div>
+                      ))}
+                    </div>
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-zinc-100">{formatPrice(Number(order.totalAmount))}</p>

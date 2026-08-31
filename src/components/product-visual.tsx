@@ -8,7 +8,9 @@ type Category =
 type Props = {
   category: Category | string;
   slug?: string;
-  size?: "card" | "detail";
+  imageUrl?: string | null;
+  alt?: string;
+  size?: "thumbnail" | "card" | "detail";
   className?: string;
 };
 
@@ -152,22 +154,22 @@ const labelToKey: Record<string, string> = Object.fromEntries(
   Object.entries(categoryMeta).map(([key, val]) => [val.label, key])
 );
 
-export function ProductVisual({ category, slug, size = "card", className = "" }: Props) {
-  const imageSrc = slug ? productImagesBySlug[slug] : undefined;
+export function ProductVisual({ category, slug, imageUrl, alt, size = "card", className = "" }: Props) {
+  const imageSrc = imageUrl || (slug ? productImagesBySlug[slug] : undefined);
   const resolvedKey = categoryMeta[category] ? category : (labelToKey[category] ?? category);
   const meta = categoryMeta[resolvedKey] ?? fallbackMeta;
 
-  const heightClass = size === "detail" ? "h-64 sm:h-72" : "h-36";
+  const heightClass = size === "detail" ? "h-64 sm:h-72" : size === "thumbnail" ? "h-20" : "h-36";
 
   if (imageSrc) {
     return (
       <div className={`relative overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900 ${heightClass} ${className}`}>
         <Image
           src={imageSrc}
-          alt={meta.label}
+          alt={alt ?? meta.label}
           fill
-          sizes={size === "detail" ? "(min-width: 1024px) 600px, 100vw" : "(min-width: 640px) 300px, 100vw"}
-          className="object-contain p-4"
+          sizes={size === "detail" ? "(min-width: 1024px) 600px, 100vw" : size === "thumbnail" ? "96px" : "(min-width: 640px) 300px, 100vw"}
+          className={`object-contain ${size === "thumbnail" ? "p-2" : "p-4"}`}
         />
       </div>
     );

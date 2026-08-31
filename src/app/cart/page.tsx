@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
+import { ProductVisual } from "@/components/product-visual";
 import { formatPrice } from "@/lib/format";
 
 type CartItem = {
@@ -14,6 +15,8 @@ type CartItem = {
   name: string;
   brand: string;
   slug: string;
+  imageUrl: string | null;
+  categoryType: string;
   price: number;
   quantity: number;
   stock: number;
@@ -108,6 +111,15 @@ export default function CartPage() {
                   key={item.id}
                   className="flex gap-4 rounded-lg border border-zinc-800 bg-zinc-900 p-4"
                 >
+                  <Link href={`/catalog/${item.slug}`} className="w-24 shrink-0" aria-label={`Vezi ${item.name}`}>
+                    <ProductVisual
+                      category={item.categoryType}
+                      slug={item.slug}
+                      imageUrl={item.imageUrl}
+                      alt={item.name}
+                      size="thumbnail"
+                    />
+                  </Link>
                   <div className="min-w-0 flex-1">
                     <Link
                       href={`/catalog/${item.slug}`}

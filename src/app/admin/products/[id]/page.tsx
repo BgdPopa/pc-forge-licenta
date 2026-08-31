@@ -24,6 +24,8 @@ export default async function AdminProductEditPage({ params }: { params: { id: s
         shortDescription: product.shortDescription,
         description: product.description,
         imageUrl: product.imageUrl,
+        categoryType: product.categoryType,
+        slug: product.slug,
         isActive: product.isActive,
         specifications: JSON.stringify(product.specifications ?? {}, null, 2),
       }}

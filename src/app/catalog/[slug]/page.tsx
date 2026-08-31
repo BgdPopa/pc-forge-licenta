@@ -132,6 +132,8 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <ProductVisual
             category={product.categoryType}
             slug={product.slug}
+            imageUrl={product.imageUrl}
+            alt={product.name}
             size="detail"
           />
 

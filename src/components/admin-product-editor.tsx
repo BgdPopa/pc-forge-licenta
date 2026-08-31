@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ProductVisual } from "@/components/product-visual";
 
 type ProductForm = {
   id: string;
@@ -14,6 +15,8 @@ type ProductForm = {
   shortDescription: string | null;
   description: string;
   imageUrl: string | null;
+  categoryType: string;
+  slug: string;
   isActive: boolean;
   specifications: string;
 };
@@ -112,7 +115,12 @@ export function AdminProductEditor({
           </div>
           <label className="text-sm text-zinc-300 sm:col-span-2">Descriere scurtă<input value={form.shortDescription} onChange={(e) => update("shortDescription", e.target.value)} className={inputClass} /></label>
           <label className="text-sm text-zinc-300 sm:col-span-2">Descriere completă<textarea required rows={5} value={form.description} onChange={(e) => update("description", e.target.value)} className={inputClass} /></label>
-          <label className="text-sm text-zinc-300 sm:col-span-2">URL imagine<input type="url" value={form.imageUrl} onChange={(e) => update("imageUrl", e.target.value)} className={inputClass} /></label>
+          <div className="sm:col-span-2">
+            <label className="text-sm text-zinc-300">Cale locală sau URL imagine<input type="text" value={form.imageUrl} onChange={(e) => update("imageUrl", e.target.value)} className={inputClass} /></label>
+            <div className="mt-3 max-w-xs">
+              <ProductVisual category={form.categoryType} slug={form.slug} imageUrl={form.imageUrl} alt={form.name} size="card" />
+            </div>
+          </div>
           <label className="flex items-center gap-3 text-sm text-zinc-300 sm:col-span-2">
             <input type="checkbox" checked={form.isActive} onChange={(e) => update("isActive", e.target.checked)} className="h-4 w-4 accent-red-600" />
             Produs vizibil în catalog

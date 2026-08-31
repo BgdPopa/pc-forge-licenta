@@ -8,6 +8,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PaymentStatus } from "@/components/payment-status";
 import { OrderPaymentActions } from "@/components/order-payment-actions";
+import { ProductVisual } from "@/components/product-visual";
 
 export default async function OrderDetailsPage({ params }: { params: { id: string } }) {
   const session = await getServerSession(authOptions);
@@ -15,7 +16,7 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
 
   const order = await prisma.order.findFirst({
     where: { id: params.id, userId: session.user.id },
-    include: { items: true },
+    include: { items: { include: { product: true } } },
   });
   if (!order) notFound();
 
@@ -52,8 +53,11 @@ export default async function OrderDetailsPage({ params }: { params: { id: strin
             <h2 className="font-semibold">Produse</h2>
             <ul className="mt-3 space-y-2">
               {order.items.map((item) => (
-                <li key={item.id} className="flex justify-between gap-4 rounded-lg bg-zinc-950 px-3 py-2 text-sm">
-                  <span className="text-zinc-300">{item.productName} <span className="text-zinc-600">× {item.quantity}</span></span>
+                <li key={item.id} className="flex items-center justify-between gap-4 rounded-lg bg-zinc-950 px-3 py-2 text-sm">
+                  <span className="flex min-w-0 items-center gap-3 text-zinc-300">
+                    <span className="w-16 shrink-0"><ProductVisual category={item.product.categoryType} slug={item.product.slug} imageUrl={item.product.imageUrl} alt={item.productName} size="thumbnail" /></span>
+                    <span>{item.productName} <span className="text-zinc-600">× {item.quantity}</span></span>
+                  </span>
                   <span className="font-medium text-zinc-200">{formatPrice(Number(item.totalPrice))}</span>
                 </li>
               ))}

@@ -27,6 +27,7 @@ export default async function Home() {
     slug: product.slug,
     name: product.name,
     brand: product.brand,
+    imageUrl: product.imageUrl,
     categoryLabel: categoryLabels[product.categoryType],
     price: Number(product.price),
     shortDescription: product.shortDescription ?? product.description,

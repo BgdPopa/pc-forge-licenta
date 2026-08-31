@@ -29,6 +29,8 @@ export async function GET() {
     name: item.product.name,
     brand: item.product.brand,
     slug: item.product.slug,
+    imageUrl: item.product.imageUrl,
+    categoryType: item.product.categoryType,
     price: Number(item.product.price),
     quantity: item.quantity,
     stock: item.product.stock,

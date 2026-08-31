@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import { formatPrice } from "@/lib/format";
+import { ProductVisual } from "@/components/product-visual";
 
 export type AdminProductRow = {
   id: string;
@@ -11,6 +12,7 @@ export type AdminProductRow = {
   slug: string;
   categoryName: string;
   categoryType: string;
+  imageUrl: string | null;
   price: number;
   stock: number;
   isActive: boolean;
@@ -277,7 +279,7 @@ export function AdminProductsTable({
             <input required type="number" min="0.01" step="0.01" value={createState.price} onChange={(e) => updateCreateField("price", e.target.value)} placeholder="Preț (RON)" className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-red-600 focus:outline-none" />
             <input required type="number" min="0" step="1" value={createState.stock} onChange={(e) => updateCreateField("stock", e.target.value)} placeholder="Stoc" className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-red-600 focus:outline-none" />
             <input value={createState.shortDescription} onChange={(e) => updateCreateField("shortDescription", e.target.value)} placeholder="Descriere scurtă" className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-red-600 focus:outline-none lg:col-span-2" />
-            <input type="url" value={createState.imageUrl} onChange={(e) => updateCreateField("imageUrl", e.target.value)} placeholder="URL imagine (opțional)" className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-red-600 focus:outline-none" />
+            <input type="text" value={createState.imageUrl} onChange={(e) => updateCreateField("imageUrl", e.target.value)} placeholder="Cale locală sau URL imagine (opțional)" className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-red-600 focus:outline-none" />
             <textarea required value={createState.description} onChange={(e) => updateCreateField("description", e.target.value)} placeholder="Descriere completă" rows={4} className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 focus:border-red-600 focus:outline-none sm:col-span-2" />
             <textarea value={createState.specifications} onChange={(e) => updateCreateField("specifications", e.target.value)} placeholder='{"cores": 8, "boostClock": 5.4}' rows={4} spellCheck={false} className="rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 font-mono text-xs text-zinc-100 focus:border-red-600 focus:outline-none sm:col-span-2" />
           </div>
@@ -326,8 +328,15 @@ export function AdminProductsTable({
               >
                 {/* Produs */}
                 <td className="px-4 py-3">
-                  <p className="font-medium text-zinc-100">{product.name}</p>
-                  <p className="text-xs text-zinc-500">{product.brand}</p>
+                  <div className="flex min-w-[240px] items-center gap-3">
+                    <div className="w-20 shrink-0">
+                      <ProductVisual category={product.categoryType} slug={product.slug} imageUrl={product.imageUrl} alt={product.name} size="thumbnail" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium text-zinc-100">{product.name}</p>
+                      <p className="text-xs text-zinc-500">{product.brand}</p>
+                    </div>
+                  </div>
                 </td>
 
                 {/* Categorie */}

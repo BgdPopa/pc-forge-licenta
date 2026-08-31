@@ -156,6 +156,7 @@ export async function POST(request: Request) {
       slug: product.slug,
       categoryName: product.category.name,
       categoryType: product.categoryType,
+      imageUrl: product.imageUrl,
       price: Number(product.price),
       stock: product.stock,
       isActive: product.isActive,
