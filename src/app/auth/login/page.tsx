@@ -97,7 +97,7 @@ export default function LoginPage() {
         </div>
 
         <p className="text-xs text-zinc-600">
-          © 2026 PC Forge — Proiect de licență, FMI, Universitatea din București
+          © 2026 PC Forge. Toate drepturile rezervate.
         </p>
       </div>
 

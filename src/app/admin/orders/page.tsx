@@ -20,6 +20,13 @@ export default async function AdminOrdersPage() {
           quantity: true,
           unitPrice: true,
           totalPrice: true,
+          product: {
+            select: {
+              slug: true,
+              imageUrl: true,
+              categoryType: true,
+            },
+          },
         },
       },
     },
@@ -42,6 +49,9 @@ export default async function AdminOrdersPage() {
       quantity: i.quantity,
       unitPrice: Number(i.unitPrice),
       totalPrice: Number(i.totalPrice),
+      productSlug: i.product.slug,
+      productImageUrl: i.product.imageUrl,
+      productCategoryType: i.product.categoryType,
     })),
   }));
 

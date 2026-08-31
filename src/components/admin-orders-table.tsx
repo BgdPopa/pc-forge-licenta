@@ -2,6 +2,7 @@
 
 import { Fragment, useMemo, useState } from "react";
 import { formatPrice } from "@/lib/format";
+import { ProductVisual } from "@/components/product-visual";
 
 export type AdminOrderRow = {
   id: string;
@@ -19,6 +20,9 @@ export type AdminOrderRow = {
     quantity: number;
     unitPrice: number;
     totalPrice: number;
+    productSlug: string;
+    productImageUrl: string | null;
+    productCategoryType: string;
   }>;
 };
 
@@ -230,7 +234,18 @@ export function AdminOrdersTable({ orders: initialOrders }: { orders: AdminOrder
                                 key={item.id}
                                 className="flex items-center justify-between rounded-lg bg-zinc-800/50 px-3 py-2 text-xs"
                               >
-                                <span className="text-zinc-300">{item.productName}</span>
+                                <div className="flex min-w-0 items-center gap-3">
+                                  <div className="w-16 shrink-0">
+                                    <ProductVisual
+                                      slug={item.productSlug}
+                                      category={item.productCategoryType}
+                                      imageUrl={item.productImageUrl}
+                                      alt={item.productName}
+                                      size="thumbnail"
+                                    />
+                                  </div>
+                                  <span className="truncate text-zinc-300">{item.productName}</span>
+                                </div>
                                 <span className="ml-4 shrink-0 text-zinc-500">
                                   {item.quantity} × {formatPrice(item.unitPrice)}
                                   {" = "}

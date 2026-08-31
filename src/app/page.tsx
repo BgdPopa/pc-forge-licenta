@@ -206,9 +206,9 @@ export default async function Home() {
                 </p>
               </li>
               <li className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
-                <h3 className="font-semibold text-zinc-100">Plata este reală?</h3>
+                <h3 className="font-semibold text-zinc-100">Cum este securizată plata?</h3>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                  Nu. Checkoutul folosește Stripe Test Mode pentru a demonstra un flux complet, inclusiv confirmarea prin webhook, fără a procesa bani reali.
+                  Checkoutul este integrat cu Stripe, iar confirmarea comenzii este verificată automat înainte ca statusul plății să fie actualizat.
                 </p>
               </li>
               <li className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">

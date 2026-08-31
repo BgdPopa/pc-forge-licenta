@@ -11,10 +11,10 @@ export function SiteFooter() {
               PC <span className="text-red-600">Forge</span>
             </Link>
             <p className="mt-3 text-sm leading-relaxed text-zinc-400">
-              Magazin online de componente și periferice pentru calculator. Proiect de licență, Tehnici Web, FMI, Universitatea din București.
+              Componente și periferice atent selecționate pentru sisteme de gaming, productivitate și utilizare zilnică.
             </p>
             <p className="mt-3 text-xs leading-relaxed text-zinc-500">
-              Platformă demonstrativă pentru lucrare de licență. Plățile folosesc Stripe Test Mode și nu procesează bani reali.
+              Configurează, compară și alege piesele potrivite pentru următorul tău PC.
             </p>
           </div>
 
@@ -52,7 +52,7 @@ export function SiteFooter() {
             </ul>
           </div>
 
-          {/* Coloana 3 — Contact demonstrativ */}
+          {/* Coloana 3 — Contact */}
           <div>
             <h3 className="text-sm font-semibold uppercase tracking-wider text-zinc-300">
               Contact
@@ -60,7 +60,7 @@ export function SiteFooter() {
             <ul className="mt-4 space-y-2 text-sm text-zinc-400">
               <li>
                 <span className="text-zinc-500">Email:</span>{" "}
-                contact@pcforge.local
+                contact@pcforge.ro
               </li>
               <li>
                 <span className="text-zinc-500">Program:</span>{" "}
@@ -68,17 +68,14 @@ export function SiteFooter() {
               </li>
               <li className="leading-relaxed">
                 <span className="text-zinc-500">Adresă:</span>{" "}
-                Facultatea de Matematică și Informatică, Universitatea din București
+                București, România
               </li>
             </ul>
-            <p className="mt-3 text-xs text-zinc-500">
-              Date demonstrative — nu reprezintă contact real.
-            </p>
           </div>
         </div>
 
         <div className="mt-10 border-t border-zinc-800 pt-6 text-center text-sm text-zinc-500">
-          © 2026 PC Forge — Proiect de licență, Tehnici Web, FMI
+          © 2026 PC Forge. Toate drepturile rezervate.
         </div>
       </div>
     </footer>
