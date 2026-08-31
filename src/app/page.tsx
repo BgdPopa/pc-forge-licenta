@@ -6,6 +6,8 @@ import { SiteFooter } from "@/components/site-footer";
 import { prisma } from "@/lib/prisma";
 import { categoryLabels, type ProductCardData } from "@/types/product";
 
+// Datele provin din PostgreSQL și trebuie citite la cerere, nu la build.
+export const dynamic = "force-dynamic";
 
 export default async function Home() {
   // Citire server-side din PostgreSQL prin Prisma Client.

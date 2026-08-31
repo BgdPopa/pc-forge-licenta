@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Prisma, ProductCategory } from "@prisma/client";
+import { ProductCategory } from "@prisma/client";
 import { ProductCard } from "@/components/product-card";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
@@ -9,18 +9,17 @@ import { scoreProducts } from "@/lib/scoring/engine";
 import { extractAttributes, SCORABLE_CATEGORIES } from "@/lib/scoring/attributes";
 import { getWeights } from "@/lib/scoring/profiles";
 import type { ScoringInput, UsageProfile } from "@/lib/scoring/types";
+import { queryCatalog, type CatalogSort } from "@/lib/catalog-query";
 
 const PAGE_SIZE = 12;
 
-type SortKey = "price-asc" | "price-desc" | "name-asc";
+type SortKey = CatalogSort;
 
-const sortOptions: Record<
-  SortKey,
-  { label: string; orderBy: Prisma.ProductOrderByWithRelationInput }
-> = {
-  "price-desc": { label: "Preț descrescător", orderBy: { price: "desc" } },
-  "price-asc": { label: "Preț crescător", orderBy: { price: "asc" } },
-  "name-asc": { label: "Nume (A–Z)", orderBy: { name: "asc" } },
+const sortOptions: Record<SortKey, { label: string }> = {
+  relevance: { label: "Relevanță" },
+  "price-desc": { label: "Preț descrescător" },
+  "price-asc": { label: "Preț crescător" },
+  "name-asc": { label: "Nume (A–Z)" },
 };
 
 type SearchParams = {
@@ -45,6 +44,7 @@ export default async function CatalogPage({
 }) {
   // Citirea și normalizarea filtrelor din query params (URL).
   const categoryParam = firstValue(searchParams.category);
+  const query = firstValue(searchParams.q)?.trim().slice(0, 120);
   const brandParam = firstValue(searchParams.brand);
   const minPrice = parsePositiveInt(firstValue(searchParams.minPrice));
   const maxPrice = parsePositiveInt(firstValue(searchParams.maxPrice));
@@ -56,26 +56,18 @@ export default async function CatalogPage({
       ? (categoryParam as ProductCategory)
       : undefined;
 
-  const sort: SortKey =
-    sortParam && sortParam in sortOptions ? (sortParam as SortKey) : "price-desc";
+  const sort: SortKey = sortParam && sortParam in sortOptions
+    ? (sortParam as SortKey)
+    : query
+      ? "relevance"
+      : "price-desc";
 
   const currentPage = Math.max(
     1,
     parsePositiveInt(firstValue(searchParams.page)) ?? 1,
   );
 
-  // Construirea clauzei WHERE pentru Prisma în funcție de filtrele active.
-  const where: Prisma.ProductWhereInput = { isActive: true };
-  if (category) where.categoryType = category;
-  if (brandParam) where.brand = brandParam;
-  if (minPrice !== undefined || maxPrice !== undefined) {
-    const priceFilter: Prisma.DecimalFilter = {};
-    if (minPrice !== undefined) priceFilter.gte = minPrice;
-    if (maxPrice !== undefined) priceFilter.lte = maxPrice;
-    where.price = priceFilter;
-  }
-
-  const [categories, brandRows, totalCount, dbProducts] = await Promise.all([
+  const [categories, brandRows, catalogResult] = await Promise.all([
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.product.findMany({
       where: { isActive: true },
@@ -83,16 +75,19 @@ export default async function CatalogPage({
       distinct: ["brand"],
       orderBy: { brand: "asc" },
     }),
-    prisma.product.count({ where }),
-    prisma.product.findMany({
-      where,
-      orderBy: sortOptions[sort].orderBy,
-      skip: (currentPage - 1) * PAGE_SIZE,
-      take: PAGE_SIZE,
+    queryCatalog({
+      query,
+      category,
+      brand: brandParam,
+      minPrice,
+      maxPrice,
+      sort,
+      page: currentPage,
+      pageSize: PAGE_SIZE,
     }),
   ]);
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const { products: dbProducts, totalCount, totalPages } = catalogResult;
   const brands = brandRows.map((row) => row.brand);
 
   // ── Scoring server-side ─────────────────────────────────────────────────
@@ -123,6 +118,7 @@ export default async function CatalogPage({
         price: true,
         categoryType: true,
         specifications: true,
+        component: { select: { tdpWatts: true } },
       },
     });
 
@@ -142,10 +138,13 @@ export default async function CatalogPage({
         brand: p.brand,
         price: Number(p.price),
         categoryType: p.categoryType,
-        attributes: extractAttributes(
-          p.categoryType,
-          p.specifications as Record<string, unknown> | null,
-        ),
+        attributes: extractAttributes(p.categoryType, {
+          ...((p.specifications as Record<string, unknown> | null) ?? {}),
+          ...(p.component?.tdpWatts !== null &&
+          p.component?.tdpWatts !== undefined
+            ? { tdpWatts: p.component.tdpWatts }
+            : {}),
+        }),
       }));
       for (const scored of scoreProducts(inputs, weights)) {
         scoreByProductId.set(scored.id, {
@@ -175,6 +174,7 @@ export default async function CatalogPage({
   // Construiește un href păstrând filtrele curente, schimbând doar pagina.
   function buildPageHref(page: number): string {
     const params = new URLSearchParams();
+    if (query) params.set("q", query);
     if (category) params.set("category", category);
     if (brandParam) params.set("brand", brandParam);
     if (minPrice !== undefined) params.set("minPrice", String(minPrice));
@@ -186,6 +186,7 @@ export default async function CatalogPage({
   }
 
   const hasActiveFilters =
+    query !== undefined ||
     category !== undefined ||
     brandParam !== undefined ||
     minPrice !== undefined ||
@@ -199,7 +200,8 @@ export default async function CatalogPage({
         <div className="mb-8">
           <h1 className="text-3xl font-bold tracking-tight">Catalog produse</h1>
           <p className="mt-2 text-zinc-400">
-            Filtrare server-side după categorie, brand și preț, cu paginare.
+            Căutare full-text și filtrare server-side după categorie, brand și
+            preț, cu paginare.
           </p>
         </div>
 
@@ -211,6 +213,24 @@ export default async function CatalogPage({
               action="/catalog"
               className="space-y-5 rounded-lg border border-zinc-800 bg-zinc-900 px-3 py-4"
             >
+              <div>
+                <label
+                  htmlFor="q"
+                  className="mb-1 block text-sm font-medium text-zinc-300"
+                >
+                  Caută în catalog
+                </label>
+                <input
+                  id="q"
+                  name="q"
+                  type="search"
+                  maxLength={120}
+                  defaultValue={query ?? ""}
+                  placeholder="Nume sau descriere"
+                  className="w-full rounded-md border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 placeholder-zinc-600 focus:border-red-600 focus:outline-none"
+                />
+              </div>
+
               <div>
                 <label
                   htmlFor="category"

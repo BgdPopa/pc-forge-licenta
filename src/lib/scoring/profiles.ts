@@ -26,7 +26,7 @@ const WEIGHTS: Partial<
   CPU: {
     gaming: { boostClock: 0.45, cores: 0.3, threads: 0.15, baseClock: 0.1 },
     workstation: { cores: 0.35, threads: 0.35, boostClock: 0.2, baseClock: 0.1 },
-    office: { cores: 0.25, threads: 0.25, boostClock: 0.25, baseClock: 0.25 },
+    office: { cores: 0.2, threads: 0.15, boostClock: 0.2, baseClock: 0.15, tdp: 0.3 },
   },
   GPU: {
     gaming: { vram: 1 },

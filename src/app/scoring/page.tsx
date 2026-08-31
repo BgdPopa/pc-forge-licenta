@@ -8,6 +8,9 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 
+// Clasamentul folosește catalogul curent și se calculează la fiecare cerere.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Scoring preț-performanță — PC Forge",
   description:
@@ -16,11 +19,18 @@ export const metadata: Metadata = {
 
 function toSpecifications(
   value: unknown,
+  tdpWatts?: number | null,
 ): Record<string, unknown> | null {
-  if (value && typeof value === "object" && !Array.isArray(value)) {
-    return value as Record<string, unknown>;
+  const specifications =
+    value && typeof value === "object" && !Array.isArray(value)
+      ? { ...(value as Record<string, unknown>) }
+      : {};
+
+  if (tdpWatts !== null && tdpWatts !== undefined) {
+    specifications.tdpWatts = tdpWatts;
   }
-  return null;
+
+  return Object.keys(specifications).length > 0 ? specifications : null;
 }
 
 export default async function ScoringPage() {
@@ -29,6 +39,7 @@ export default async function ScoringPage() {
       isActive: true,
       categoryType: { in: SCORABLE_CATEGORIES },
     },
+    include: { component: { select: { tdpWatts: true } } },
     orderBy: { name: "asc" },
   });
 
@@ -39,7 +50,10 @@ export default async function ScoringPage() {
     brand: product.brand,
     price: Number(product.price),
     categoryType: product.categoryType,
-    specifications: toSpecifications(product.specifications),
+    specifications: toSpecifications(
+      product.specifications,
+      product.component?.tdpWatts,
+    ),
   }));
 
   return (

@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { ProductCategory } from "@prisma/client";
-import { validateConfiguration } from "@/lib/csp/engine";
+import { validateConfiguration } from "@/lib/csp/validator";
 import type {
   CompatibilityConstraint,
   ComponentData,

@@ -8,6 +8,7 @@ import type { ScoringInput, UsageProfile } from "../src/lib/scoring/types";
 async function scoreCategory(category: ProductCategory, profile: UsageProfile) {
   const products = await prisma.product.findMany({
     where: { categoryType: category, isActive: true },
+    include: { component: { select: { tdpWatts: true } } },
   });
 
   const inputs: ScoringInput[] = products.map((p) => ({
@@ -16,10 +17,13 @@ async function scoreCategory(category: ProductCategory, profile: UsageProfile) {
     brand: p.brand,
     price: Number(p.price),
     categoryType: p.categoryType,
-    attributes: extractAttributes(
-      category,
-      p.specifications as Record<string, unknown> | null,
-    ),
+    attributes: extractAttributes(category, {
+      ...((p.specifications as Record<string, unknown> | null) ?? {}),
+      ...(p.component?.tdpWatts !== null &&
+      p.component?.tdpWatts !== undefined
+        ? { tdpWatts: p.component.tdpWatts }
+        : {}),
+    }),
   }));
 
   const results = scoreProducts(inputs, getWeights(category, profile));
@@ -40,6 +44,7 @@ async function scoreCategory(category: ProductCategory, profile: UsageProfile) {
 async function main() {
   await scoreCategory("CPU", "gaming");
   await scoreCategory("CPU", "workstation");
+  await scoreCategory("CPU", "office");
   await scoreCategory("RAM", "gaming");
   await scoreCategory("STORAGE", "office");
 }

@@ -29,7 +29,15 @@ export default function LoginPage() {
       return;
     }
 
-    router.push("/");
+    const requestedUrl = new URLSearchParams(window.location.search).get(
+      "callbackUrl",
+    );
+    const destination =
+      requestedUrl?.startsWith("/") && !requestedUrl.startsWith("//")
+        ? requestedUrl
+        : "/";
+
+    router.push(destination);
     router.refresh();
   }
 

@@ -16,7 +16,7 @@ export function parseNumeric(value: unknown): number | null {
 
 type Specs = Record<string, unknown> | null | undefined;
 
-type AttributeDef = {
+export type AttributeDef = {
   key: string;
   label: string;
   unit: string | null;
@@ -32,6 +32,7 @@ const CATEGORY_ATTRIBUTES: Partial<Record<ProductCategory, AttributeDef[]>> = {
     { key: "threads", label: "Fire de execuție", unit: null, source: "threads", higherIsBetter: true },
     { key: "boostClock", label: "Frecvență boost", unit: "GHz", source: "boostClock", higherIsBetter: true },
     { key: "baseClock", label: "Frecvență de bază", unit: "GHz", source: "baseClock", higherIsBetter: true },
+    { key: "tdp", label: "Consum estimat (TDP)", unit: "W", source: "tdpWatts", higherIsBetter: false },
   ],
   GPU: [
     { key: "vram", label: "Memorie video", unit: "GB", source: "vram", higherIsBetter: true },
@@ -97,4 +98,11 @@ export function getSpecSourceField(
   const defs = CATEGORY_ATTRIBUTES[categoryType];
   if (!defs) return null;
   return defs.find((def) => def.key === attributeKey)?.source ?? null;
+}
+
+/** Definițiile afișabile pentru sliderele de ponderi ale unei categorii. */
+export function getAttributeDefinitions(
+  categoryType: ProductCategory,
+): readonly AttributeDef[] {
+  return CATEGORY_ATTRIBUTES[categoryType] ?? [];
 }
