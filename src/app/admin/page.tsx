@@ -14,6 +14,8 @@ export default async function AdminDashboardPage() {
     totalOrders,
     totalUsers,
     totalConfigurations,
+    activeRules,
+    pendingOrders,
     ordersAggregate,
     recentOrders,
   ] = await Promise.all([
@@ -22,7 +24,12 @@ export default async function AdminDashboardPage() {
     prisma.order.count(),
     prisma.user.count(),
     prisma.configuration.count(),
-    prisma.order.aggregate({ _sum: { totalAmount: true } }),
+    prisma.compatibilityRule.count({ where: { isActive: true } }),
+    prisma.order.count({ where: { status: "PENDING" } }),
+    prisma.order.aggregate({
+      where: { status: { not: "CANCELLED" } },
+      _sum: { totalAmount: true },
+    }),
     prisma.order.findMany({
       take: 5,
       orderBy: { createdAt: "desc" },
@@ -48,8 +55,8 @@ export default async function AdminDashboardPage() {
     {
       label: "Comenzi plasate",
       value: totalOrders,
-      note: totalRevenue > 0 ? formatPrice(totalRevenue) + " total" : "Nicio vânzare",
-      noteColor: "text-zinc-400",
+      note: pendingOrders > 0 ? `${pendingOrders} în așteptare` : totalRevenue > 0 ? formatPrice(totalRevenue) + " valide" : "Nicio vânzare",
+      noteColor: pendingOrders > 0 ? "text-amber-400" : "text-zinc-400",
       href: "/admin/orders",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -62,7 +69,7 @@ export default async function AdminDashboardPage() {
       value: totalUsers,
       note: "Conturi active",
       noteColor: "text-zinc-400",
-      href: null,
+      href: "/admin/users",
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -78,6 +85,18 @@ export default async function AdminDashboardPage() {
       icon: (
         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
+        </svg>
+      ),
+    },
+    {
+      label: "Reguli CSP active",
+      value: activeRules,
+      note: "Validare configurator",
+      noteColor: "text-zinc-400",
+      href: "/admin/rules",
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.6-8A12 12 0 0112 3a12 12 0 01-8.6 3A12 12 0 003 9c0 5.6 3.8 10.3 9 11.6 5.2-1.3 9-6 9-11.6 0-1-.1-2-.4-3z" />
         </svg>
       ),
     },
@@ -119,7 +138,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Carduri statistici */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         {stats.map((stat) => {
           const card = (
             <div
@@ -205,7 +224,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Link-uri rapide */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Link
           href="/admin/products"
           className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-4 transition-colors hover:border-zinc-700"
@@ -229,6 +248,26 @@ export default async function AdminDashboardPage() {
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-zinc-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
           </svg>
+        </Link>
+        <Link
+          href="/admin/users"
+          className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-4 transition-colors hover:border-zinc-700"
+        >
+          <div>
+            <p className="font-medium text-zinc-200">Administrează utilizatori</p>
+            <p className="mt-0.5 text-xs text-zinc-500">Conturi și roluri administrative</p>
+          </div>
+          <span className="text-zinc-600">→</span>
+        </Link>
+        <Link
+          href="/admin/rules"
+          className="flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900 p-4 transition-colors hover:border-zinc-700"
+        >
+          <div>
+            <p className="font-medium text-zinc-200">Reguli de compatibilitate</p>
+            <p className="mt-0.5 text-xs text-zinc-500">Activează regulile motorului CSP</p>
+          </div>
+          <span className="text-zinc-600">→</span>
         </Link>
       </div>
     </div>

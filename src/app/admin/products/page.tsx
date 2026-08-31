@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import {
   AdminProductsTable,
+  type AdminCategoryOption,
   type AdminProductRow,
 } from "@/components/admin-products-table";
 
@@ -10,10 +11,13 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminProductsPage() {
-  const dbProducts = await prisma.product.findMany({
-    include: { category: { select: { name: true } } },
-    orderBy: [{ categoryType: "asc" }, { name: "asc" }],
-  });
+  const [dbProducts, dbCategories] = await Promise.all([
+    prisma.product.findMany({
+      include: { category: { select: { name: true } } },
+      orderBy: [{ categoryType: "asc" }, { name: "asc" }],
+    }),
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+  ]);
 
   const products: AdminProductRow[] = dbProducts.map((p) => ({
     id: p.id,
@@ -29,6 +33,11 @@ export default async function AdminProductsPage() {
 
   const outOfStock = products.filter((p) => p.stock === 0).length;
   const lowStock = products.filter((p) => p.stock > 0 && p.stock <= 5).length;
+  const categories: AdminCategoryOption[] = dbCategories.map((category) => ({
+    id: category.id,
+    name: category.name,
+    type: category.type,
+  }));
 
   return (
     <div className="space-y-6">
@@ -36,7 +45,7 @@ export default async function AdminProductsPage() {
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-zinc-100">Catalog produse</h1>
         <p className="mt-1 text-sm text-zinc-400">
-          {products.length} produse înregistrate. Poți edita prețul și stocul direct din tabel.
+          {products.length} produse înregistrate. Poți căuta, filtra, adăuga și actualiza catalogul.
         </p>
       </div>
 
@@ -75,7 +84,7 @@ export default async function AdminProductsPage() {
       </div>
 
       {/* Tabel */}
-      <AdminProductsTable products={products} />
+      <AdminProductsTable products={products} categories={categories} />
     </div>
   );
 }

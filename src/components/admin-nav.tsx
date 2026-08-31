@@ -7,6 +7,8 @@ const adminLinks = [
   { label: "Dashboard", href: "/admin" },
   { label: "Produse", href: "/admin/products" },
   { label: "Comenzi", href: "/admin/orders" },
+  { label: "Utilizatori", href: "/admin/users" },
+  { label: "Reguli CSP", href: "/admin/rules" },
 ];
 
 export function AdminNav() {
