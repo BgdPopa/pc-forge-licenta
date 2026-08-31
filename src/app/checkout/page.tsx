@@ -74,7 +74,13 @@ export default function CheckoutPage() {
       return;
     }
 
-    router.push(`/checkout/success?orderId=${data.orderId}`);
+    if (!data?.checkoutUrl || typeof data.checkoutUrl !== "string") {
+      setError("Stripe nu a returnat o adresă de plată validă.");
+      setSubmitting(false);
+      return;
+    }
+
+    window.location.assign(data.checkoutUrl);
   }
 
   return (
@@ -175,11 +181,12 @@ export default function CheckoutPage() {
                 disabled={submitting}
                 className="w-full rounded-md bg-red-600 px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-red-500 disabled:opacity-50"
               >
-                {submitting ? "Se plasează comanda..." : "Plasează comanda"}
+                {submitting ? "Se deschide Stripe..." : "Continuă cu Stripe Test"}
               </button>
 
               <p className="text-center text-xs text-zinc-600">
-                Plata este simulată. Nu se procesează nicio tranzacție reală.
+                Vei fi redirecționat către Stripe Test Mode. Se folosesc doar
+                carduri de test și nu se procesează bani reali.
               </p>
             </form>
 

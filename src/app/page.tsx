@@ -207,13 +207,13 @@ export default async function Home() {
               <li className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
                 <h3 className="font-semibold text-zinc-100">Plata este reală?</h3>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                  Nu. Fluxul de checkout este simulativ și este folosit pentru demonstrarea arhitecturii unui magazin online. Nicio tranzacție reală nu este procesată.
+                  Nu. Checkoutul folosește Stripe Test Mode pentru a demonstra un flux complet, inclusiv confirmarea prin webhook, fără a procesa bani reali.
                 </p>
               </li>
               <li className="rounded-lg border border-zinc-800 bg-zinc-900 p-6">
                 <h3 className="font-semibold text-zinc-100">Pot salva o configurație?</h3>
                 <p className="mt-2 text-sm leading-relaxed text-zinc-400">
-                  În versiunea curentă, configurația poate fi selectată și validată în pagină. Salvarea configurațiilor în cont este prevăzută ca extensie viitoare, deoarece schema bazei de date include deja tabelele necesare.
+                  Da. Utilizatorii autentificați pot salva configurațiile validate și le pot administra ulterior din secțiunea „Configurațiile mele”.
                 </p>
               </li>
             </ul>

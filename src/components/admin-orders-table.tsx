@@ -10,6 +10,8 @@ export type AdminOrderRow = {
   shippingAddress: string;
   totalAmount: number;
   status: string;
+  paymentMethod: string;
+  paymentStatus: string;
   createdAt: string;
   items: Array<{
     id: string;
@@ -30,6 +32,13 @@ const STATUS_STYLES: Record<string, string> = {
   PENDING: "bg-amber-950/50 text-amber-400 border-amber-900/40",
   CONFIRMED: "bg-emerald-950/40 text-emerald-400 border-emerald-900/40",
   CANCELLED: "bg-zinc-800 text-zinc-500 border-zinc-700",
+};
+
+const PAYMENT_LABELS: Record<string, string> = {
+  PENDING: "Plată în curs",
+  PAID: "Plătită",
+  FAILED: "Plată eșuată",
+  CANCELLED: "Plată anulată",
 };
 
 function formatDate(iso: string) {
@@ -76,7 +85,13 @@ export function AdminOrdersTable({ orders: initialOrders }: { orders: AdminOrder
       if (!response.ok) throw new Error(data.error ?? "Actualizarea a eșuat.");
       setOrders((current) =>
         current.map((entry) =>
-          entry.id === order.id ? { ...entry, status: data.status } : entry,
+          entry.id === order.id
+            ? {
+                ...entry,
+                status: data.status,
+                paymentStatus: data.paymentStatus ?? entry.paymentStatus,
+              }
+            : entry,
         ),
       );
     } catch (caught) {
@@ -180,6 +195,10 @@ export function AdminOrdersTable({ orders: initialOrders }: { orders: AdminOrder
                       <option value="CONFIRMED">{STATUS_LABELS.CONFIRMED}</option>
                       <option value="CANCELLED">{STATUS_LABELS.CANCELLED}</option>
                     </select>
+                    <p className={`mt-1 text-[10px] font-medium ${order.paymentStatus === "PAID" ? "text-emerald-500" : order.paymentStatus === "PENDING" ? "text-amber-500" : "text-red-500"}`}>
+                      {PAYMENT_LABELS[order.paymentStatus] ?? order.paymentStatus}
+                      {order.paymentMethod === "STRIPE_TEST" ? " · Stripe Test" : " · Simulată"}
+                    </p>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <svg

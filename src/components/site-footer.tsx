@@ -14,7 +14,7 @@ export function SiteFooter() {
               Magazin online de componente și periferice pentru calculator. Proiect de licență, Tehnici Web, FMI, Universitatea din București.
             </p>
             <p className="mt-3 text-xs leading-relaxed text-zinc-500">
-              Platformă demonstrativă pentru lucrare de licență. Plata este simulată, iar nicio tranzacție reală nu este procesată.
+              Platformă demonstrativă pentru lucrare de licență. Plățile folosesc Stripe Test Mode și nu procesează bani reali.
             </p>
           </div>
 

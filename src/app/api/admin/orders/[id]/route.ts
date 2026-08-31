@@ -3,6 +3,7 @@ import { OrderStatus } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { cancelStripeCheckoutOrder } from "@/lib/order-payment";
 
 type RouteContext = { params: { id: string } };
 
@@ -39,13 +40,65 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     return NextResponse.json({ error: "Comanda nu există." }, { status: 404 });
   }
   if (existing.status === nextStatus) {
-    return NextResponse.json({ id: existing.id, status: existing.status });
+    return NextResponse.json({
+      id: existing.id,
+      status: existing.status,
+      paymentStatus: existing.paymentStatus,
+    });
   }
   if (existing.status === "CANCELLED") {
     return NextResponse.json(
       { error: "O comandă anulată nu poate fi redeschisă." },
       { status: 409 },
     );
+  }
+
+  if (existing.paymentMethod === "STRIPE_TEST") {
+    if (existing.paymentStatus === "PAID") {
+      return NextResponse.json(
+        { error: "O comandă Stripe plătită necesită un flux separat de rambursare." },
+        { status: 409 },
+      );
+    }
+    if (nextStatus !== "CANCELLED") {
+      return NextResponse.json(
+        { error: "Comenzile Stripe sunt confirmate exclusiv prin webhook." },
+        { status: 409 },
+      );
+    }
+
+    try {
+      const paymentStatus = await cancelStripeCheckoutOrder(existing.id);
+      if (paymentStatus === "PAID") {
+        return NextResponse.json(
+          { error: "Plata a fost confirmată între timp și nu poate fi anulată fără rambursare." },
+          { status: 409 },
+        );
+      }
+      if (paymentStatus === "PENDING") {
+        return NextResponse.json(
+          { error: "Plata este în procesare și nu poate fi anulată momentan." },
+          { status: 409 },
+        );
+      }
+      if (paymentStatus !== "CANCELLED") {
+        return NextResponse.json(
+          { error: "Comanda Stripe nu a putut fi anulată." },
+          { status: 409 },
+        );
+      }
+      return NextResponse.json({
+        id: existing.id,
+        status: "CANCELLED",
+        paymentStatus,
+      });
+    } catch (error) {
+      console.error("[admin-orders] anularea sesiunii Stripe a eșuat", error);
+      return NextResponse.json(
+        { error: "Sesiunea Stripe nu a putut fi anulată." },
+        { status: 502 },
+      );
+    }
   }
 
   try {
@@ -61,6 +114,10 @@ export async function PATCH(request: Request, { params }: RouteContext) {
       }
 
       if (nextStatus === "CANCELLED") {
+        await tx.order.update({
+          where: { id: existing.id },
+          data: { paymentStatus: "CANCELLED" },
+        });
         for (const item of existing.items) {
           await tx.product.update({
             where: { id: item.productId },
@@ -79,5 +136,9 @@ export async function PATCH(request: Request, { params }: RouteContext) {
     throw error;
   }
 
-  return NextResponse.json({ id: existing.id, status: nextStatus });
+  return NextResponse.json({
+    id: existing.id,
+    status: nextStatus,
+    paymentStatus: nextStatus === "CANCELLED" ? "CANCELLED" : existing.paymentStatus,
+  });
 }

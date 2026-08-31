@@ -27,7 +27,7 @@ export default async function AdminDashboardPage() {
     prisma.compatibilityRule.count({ where: { isActive: true } }),
     prisma.order.count({ where: { status: "PENDING" } }),
     prisma.order.aggregate({
-      where: { status: { not: "CANCELLED" } },
+      where: { status: { not: "CANCELLED" }, paymentStatus: "PAID" },
       _sum: { totalAmount: true },
     }),
     prisma.order.findMany({

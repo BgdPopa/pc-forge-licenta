@@ -33,6 +33,8 @@ export default async function AdminOrdersPage() {
     shippingAddress: o.shippingAddress,
     totalAmount: Number(o.totalAmount),
     status: o.status,
+    paymentMethod: o.paymentMethod,
+    paymentStatus: o.paymentStatus,
     createdAt: o.createdAt.toISOString(),
     items: o.items.map((i) => ({
       id: i.id,
@@ -44,7 +46,9 @@ export default async function AdminOrdersPage() {
   }));
 
   // Statistici sumar
-  const totalRevenue = orders.reduce((s, o) => s + o.totalAmount, 0);
+  const totalRevenue = orders
+    .filter((order) => order.paymentStatus === "PAID" && order.status !== "CANCELLED")
+    .reduce((sum, order) => sum + order.totalAmount, 0);
   const byStatus = {
     PENDING: orders.filter((o) => o.status === "PENDING").length,
     CONFIRMED: orders.filter((o) => o.status === "CONFIRMED").length,
@@ -59,7 +63,7 @@ export default async function AdminOrdersPage() {
         <p className="mt-1 text-sm text-zinc-400">
           {orders.length === 0
             ? "Nu există comenzi înregistrate."
-            : `${orders.length} ${orders.length === 1 ? "comandă" : "comenzi"} — ${formatPrice(totalRevenue)} valoare totală.`}
+            : `${orders.length} ${orders.length === 1 ? "comandă" : "comenzi"} — ${formatPrice(totalRevenue)} încasări confirmate.`}
         </p>
       </div>
 
