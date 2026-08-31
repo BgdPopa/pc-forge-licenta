@@ -832,26 +832,56 @@ type UserSeed = {
   role: Role;
 };
 
-// Utilizatori de development. Parolele sunt hash-uite cu bcrypt înainte de
-// stocare; în baza de date ajunge doar `passwordHash`, niciodată parola în clar.
-// Aceste credențiale sunt strict pentru testare locală și demonstrație.
-const users: UserSeed[] = [
-  {
-    name: "Administrator PC Forge",
-    email: "admin@pcforge.local",
-    password: "admin12345",
-    role: "ADMIN",
-  },
-  {
-    name: "Utilizator Demo",
-    email: "user@pcforge.local",
-    password: "user12345",
-    role: "USER",
-  },
-];
+const databaseHostname = (() => {
+  try {
+    return new URL(process.env.DATABASE_URL ?? "").hostname;
+  } catch {
+    return "";
+  }
+})();
+
+const isLocalDatabase = ["localhost", "127.0.0.1", "::1"].includes(
+  databaseHostname,
+);
+
+function getSeedPassword(variable: string, localFallback: string) {
+  const value = process.env[variable]?.trim();
+
+  if (value) {
+    if (value.length < 12) {
+      throw new Error(`${variable} trebuie să conțină cel puțin 12 caractere.`);
+    }
+    return value;
+  }
+
+  if (isLocalDatabase) return localFallback;
+
+  throw new Error(
+    `${variable} este obligatorie când seed-ul rulează pe o bază de date externă.`,
+  );
+}
+
+function getUsers(): UserSeed[] {
+  return [
+    {
+      name: "Administrator PC Forge",
+      email: "admin@pcforge.local",
+      password: getSeedPassword("SEED_ADMIN_PASSWORD", "admin12345"),
+      role: "ADMIN",
+    },
+    {
+      name: "Utilizator Demo",
+      email: "user@pcforge.local",
+      password: getSeedPassword("SEED_USER_PASSWORD", "user12345"),
+      role: "USER",
+    },
+  ];
+}
 
 async function main() {
   console.log("Seed pornit...");
+
+  const users = getUsers();
 
   const categoryIdByType = new Map<ProductCategory, string>();
 
