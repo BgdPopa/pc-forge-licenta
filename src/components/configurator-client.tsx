@@ -12,6 +12,7 @@ import type {
 } from "@/lib/csp/types";
 import { categoryLabels } from "@/types/product";
 import { formatPrice } from "@/lib/format";
+import { POWER_OVERHEAD_W } from "@/lib/configuration-evaluation";
 
 // ─── Tipuri exportate ────────────────────────────────────────────────────────
 
@@ -33,9 +34,6 @@ type Props = {
 };
 
 // ─── Constante ───────────────────────────────────────────────────────────────
-
-/** Consum suplimentar estimat (ventilatoare, stocare, plăci de bază) */
-const POWER_OVERHEAD_W = 100;
 
 /** Număr minim de componente pentru a permite salvarea */
 const MIN_COMPONENTS_TO_SAVE = 3;
@@ -267,9 +265,8 @@ export function ConfiguratorClient({ slots, products, constraints, userId }: Pro
     setSaveState("saving");
 
     const name = saveName.trim() || defaultConfigName();
-    const items = selectedComponents.map((c) => ({
-      productId: c.productId,
-      categoryType: c.categoryType,
+    const items = selectedComponents.map((component) => ({
+      productId: component.productId,
     }));
 
     try {
@@ -279,9 +276,6 @@ export function ConfiguratorClient({ slots, products, constraints, userId }: Pro
         body: JSON.stringify({
           name,
           items,
-          totalPrice,
-          totalPower: powerCheck?.estimated ?? null,
-          isValid: configStatus === "valid",
         }),
       });
 
