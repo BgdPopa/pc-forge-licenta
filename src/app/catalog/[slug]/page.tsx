@@ -13,18 +13,30 @@ type PageProps = {
   params: { slug: string };
 };
 
-type SpecRow = { label: string; value: string };
+type SpecRow = {
+  label: string;
+  value: string;
+};
 
 export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-    select: { name: true, shortDescription: true, description: true },
+  const product = await prisma.product.findFirst({
+    where: {
+      slug: params.slug,
+      isActive: true,
+    },
+    select: {
+      name: true,
+      shortDescription: true,
+      description: true,
+    },
   });
 
   if (!product) {
-    return { title: "Produs negăsit — PC Forge" };
+    return {
+      title: "Produs negăsit — PC Forge",
+    };
   }
 
   return {
@@ -34,9 +46,15 @@ export async function generateMetadata({
 }
 
 export default async function ProductDetailPage({ params }: PageProps) {
-  const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
-    include: { component: true, category: true },
+  const product = await prisma.product.findFirst({
+    where: {
+      slug: params.slug,
+      isActive: true,
+    },
+    include: {
+      component: true,
+      category: true,
+    },
   });
 
   if (!product) {
@@ -45,13 +63,19 @@ export default async function ProductDetailPage({ params }: PageProps) {
 
   // Specificații tehnice structurate din tabelul Component (alimentează CSP-ul).
   const componentSpecs: SpecRow[] = [];
+
   if (product.component) {
     const c = product.component;
+
     const push = (label: string, value: string | null | undefined) => {
       if (value !== null && value !== undefined && value !== "") {
-        componentSpecs.push({ label, value });
+        componentSpecs.push({
+          label,
+          value,
+        });
       }
     };
+
     push("Socket", c.socket);
     push("Tip memorie", c.ramType);
     push("Factor de formă", c.formFactor);
@@ -95,11 +119,22 @@ export default async function ProductDetailPage({ params }: PageProps) {
   // Specificații libere din câmpul Json `specifications`.
   const extraSpecs: SpecRow[] = [];
   const rawSpecs = product.specifications;
+
   if (rawSpecs && typeof rawSpecs === "object" && !Array.isArray(rawSpecs)) {
-    for (const [key, value] of Object.entries(rawSpecs as Record<string, unknown>)) {
-      if (value === null || value === undefined) continue;
-      const display = typeof value === "boolean" ? (value ? "Da" : "Nu") : String(value);
-      extraSpecs.push({ label: specLabels[key] ?? key, value: display });
+    for (const [key, value] of Object.entries(
+      rawSpecs as Record<string, unknown>,
+    )) {
+      if (value === null || value === undefined) {
+        continue;
+      }
+
+      const display =
+        typeof value === "boolean" ? (value ? "Da" : "Nu") : String(value);
+
+      extraSpecs.push({
+        label: specLabels[key] ?? key,
+        value: display,
+      });
     }
   }
 
@@ -116,14 +151,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
           <Link href="/catalog" className="hover:text-red-500">
             Catalog
           </Link>
+
           <span>/</span>
+
           <Link
             href={`/catalog?category=${product.categoryType}`}
             className="hover:text-red-500"
           >
             {product.category.name}
           </Link>
+
           <span>/</span>
+
           <span className="text-zinc-300">{product.name}</span>
         </nav>
 
@@ -142,22 +181,34 @@ export default async function ProductDetailPage({ params }: PageProps) {
             <span className="inline-block rounded-md bg-zinc-800 px-2.5 py-1 text-xs font-medium text-red-400">
               {categoryLabel}
             </span>
+
             <p className="mt-3 text-xs font-semibold uppercase tracking-widest text-zinc-500">
               {product.brand}
             </p>
+
             <h1 className="mt-1 text-xl font-bold leading-snug tracking-tight text-zinc-100 lg:text-2xl">
               {product.name}
             </h1>
 
             <div className="mt-5 border-t border-zinc-800 pt-5">
               <p className="text-xs text-zinc-500">Preț</p>
+
               <p className="mt-1 text-3xl font-bold text-red-500">
                 {formatPrice(Number(product.price))}
               </p>
             </div>
 
-            <p className={`mt-3 flex items-center gap-1.5 text-sm font-medium ${inStock ? "text-emerald-400" : "text-zinc-500"}`}>
-              <span className={`h-2 w-2 rounded-full ${inStock ? "bg-emerald-400" : "bg-zinc-600"}`} />
+            <p
+              className={`mt-3 flex items-center gap-1.5 text-sm font-medium ${
+                inStock ? "text-emerald-400" : "text-zinc-500"
+              }`}
+            >
+              <span
+                className={`h-2 w-2 rounded-full ${
+                  inStock ? "bg-emerald-400" : "bg-zinc-600"
+                }`}
+              />
+
               {inStock ? `În stoc (${product.stock} buc.)` : "Stoc epuizat"}
             </p>
 
@@ -168,18 +219,27 @@ export default async function ProductDetailPage({ params }: PageProps) {
         {/* Descriere + specificații */}
         <div className="mt-10 grid gap-8 lg:grid-cols-[1fr_320px]">
           <div>
-            <p className="leading-relaxed text-zinc-300">{product.description}</p>
+            <p className="leading-relaxed text-zinc-300">
+              {product.description}
+            </p>
 
             {componentSpecs.length > 0 && (
               <section className="mt-10">
                 <h2 className="text-lg font-semibold text-zinc-100">
                   Specificații tehnice
                 </h2>
+
                 <dl className="mt-4 divide-y divide-zinc-800 rounded-lg border border-zinc-800">
                   {componentSpecs.map((spec) => (
-                    <div key={spec.label} className="flex justify-between gap-4 px-4 py-3">
+                    <div
+                      key={spec.label}
+                      className="flex justify-between gap-4 px-4 py-3"
+                    >
                       <dt className="text-sm text-zinc-400">{spec.label}</dt>
-                      <dd className="text-sm font-medium text-zinc-100">{spec.value}</dd>
+
+                      <dd className="text-sm font-medium text-zinc-100">
+                        {spec.value}
+                      </dd>
                     </div>
                   ))}
                 </dl>
@@ -191,11 +251,18 @@ export default async function ProductDetailPage({ params }: PageProps) {
                 <h2 className="text-lg font-semibold text-zinc-100">
                   Detalii suplimentare
                 </h2>
+
                 <dl className="mt-4 divide-y divide-zinc-800 rounded-lg border border-zinc-800">
                   {extraSpecs.map((spec) => (
-                    <div key={spec.label} className="flex justify-between gap-4 px-4 py-3">
+                    <div
+                      key={spec.label}
+                      className="flex justify-between gap-4 px-4 py-3"
+                    >
                       <dt className="text-sm text-zinc-400">{spec.label}</dt>
-                      <dd className="text-sm font-medium text-zinc-100">{spec.value}</dd>
+
+                      <dd className="text-sm font-medium text-zinc-100">
+                        {spec.value}
+                      </dd>
                     </div>
                   ))}
                 </dl>
